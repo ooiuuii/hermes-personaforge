@@ -628,15 +628,15 @@ button {
 .runtime-body {
   min-height: 380px;
   display: grid;
-  grid-template-columns: 300px 1fr;
+  grid-template-columns: 240px minmax(0, 1fr);
   align-items: center;
-  gap: 18px;
-  padding: 26px;
+  gap: 14px;
+  padding: 22px;
 }
 
 .persona-portrait {
-  width: 270px;
-  height: 330px;
+  width: 224px;
+  height: 292px;
   position: relative;
   justify-self: center;
   border-radius: 8px;
@@ -650,10 +650,10 @@ button {
 
 .portrait-hair {
   position: absolute;
-  left: 38px;
-  top: 28px;
-  width: 196px;
-  height: 230px;
+  left: 31px;
+  top: 25px;
+  width: 164px;
+  height: 205px;
   border-radius: 88px 88px 70px 70px;
   background:
     linear-gradient(90deg, rgba(255, 255, 255, 0.12), transparent 28%),
@@ -662,37 +662,37 @@ button {
 
 .portrait-face {
   position: absolute;
-  left: 68px;
-  top: 88px;
-  width: 138px;
-  height: 152px;
+  left: 55px;
+  top: 78px;
+  width: 116px;
+  height: 134px;
   border-radius: 52px 52px 62px 62px;
   background: linear-gradient(180deg, #ffe5de, #f6c9c2);
 }
 
 .eye {
   position: absolute;
-  top: 55px;
-  width: 24px;
-  height: 30px;
+  top: 48px;
+  width: 20px;
+  height: 26px;
   border-radius: 50%;
   background: #724d7f;
   box-shadow: inset 0 8px 0 rgba(255, 255, 255, 0.36);
 }
 
 .left-eye {
-  left: 30px;
+  left: 25px;
 }
 
 .right-eye {
-  right: 30px;
+  right: 25px;
 }
 
 .mouth {
   position: absolute;
-  left: 62px;
-  top: 104px;
-  width: 18px;
+  left: 51px;
+  top: 91px;
+  width: 16px;
   height: 7px;
   border-bottom: 3px solid #8a5361;
   border-radius: 50%;
@@ -700,8 +700,8 @@ button {
 
 .blush {
   position: absolute;
-  top: 90px;
-  width: 26px;
+  top: 80px;
+  width: 22px;
   height: 12px;
   border-radius: 999px;
   background: rgba(239, 126, 136, 0.35);
@@ -727,11 +727,11 @@ button {
 
 .portrait-ribbon {
   position: absolute;
-  right: 58px;
-  top: 52px;
-  width: 38px;
-  height: 38px;
-  border: 8px solid #f7c663;
+  right: 46px;
+  top: 48px;
+  width: 32px;
+  height: 32px;
+  border: 7px solid #f7c663;
   border-radius: 8px;
   transform: rotate(12deg);
 }
@@ -756,7 +756,8 @@ button {
 .speech-panel {
   display: grid;
   gap: 10px;
-  padding: 18px;
+  min-width: 0;
+  padding: 16px;
   border: 1px solid rgba(248, 244, 236, 0.14);
   border-radius: 8px;
   background: rgba(255, 255, 255, 0.055);
@@ -771,8 +772,9 @@ button {
 
 .speech-panel strong {
   color: #fffaf0;
-  font-size: 28px;
+  font-size: 21px;
   line-height: 1.15;
+  overflow-wrap: anywhere;
 }
 
 .speech-panel p {
