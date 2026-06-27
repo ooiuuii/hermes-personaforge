@@ -17,6 +17,19 @@ This is a fourth standalone Hermes Agent Accelerated Business Hackathon submissi
 A paid persona-pack order becomes a Hermes-verified license, a voice-and-vision runtime session, and a proof pack that judges can regenerate.
 ```
 
+## Watch
+
+```text
+GitHub Release: https://github.com/ooiuuii/hermes-personaforge/releases/tag/v0.1-demo
+Direct MP4: https://github.com/ooiuuii/hermes-personaforge/releases/download/v0.1-demo/hermes-personaforge-full-demo.en.andrew-nas-bgm.mp4
+```
+
+Local generated copy:
+
+```text
+artifacts/videos/hermes-personaforge-full-demo.en.andrew-nas-bgm.mp4
+```
+
 ## Demo Story
 
 The emotional hook is simple: a buyer pays for a persona pack, then the character "wakes up" as a runtime experience.
