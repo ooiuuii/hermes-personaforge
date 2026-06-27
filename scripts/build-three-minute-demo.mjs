@@ -1,13 +1,12 @@
 import { chromium } from "@playwright/test";
 import { execFileSync, spawnSync } from "node:child_process";
 import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
-import { rename, writeFile } from "node:fs/promises";
+import { rename } from "node:fs/promises";
 import path from "node:path";
 
 const root = process.cwd();
 const ffmpeg = process.env.FFMPEG_BIN ?? "ffmpeg";
 const ffprobe = process.env.FFPROBE_BIN ?? "ffprobe";
-const edgeTts = process.env.EDGE_TTS_BIN ?? "edge-tts";
 
 const videoDir = path.join(root, "artifacts", "videos");
 const audioDir = path.join(root, "artifacts", "audio");
@@ -22,48 +21,126 @@ const localSpriteDir = path.resolve(
   process.env.PERSONAFORGE_LOCAL_SPRITE_DIR ??
     "F:/AI/app/2dclaw-bridge/downloads/nanami_official_extracted/sprites/nanami",
 );
+const localVoiceDir = path.resolve(
+  process.env.PERSONAFORGE_LOCAL_VOICE_DIR ??
+    "F:/AI/app/2dclaw-bridge/downloads/nanami_official_extracted/speech/nanami",
+);
 
 const experienceSilent = path.join(videoDir, "hermes-personaforge-persona-experience.en-sub.silent.mp4");
-const experienceAudio = path.join(audioDir, "hermes-personaforge-persona-experience.ja-voice.m4a");
-const experienceVideo = path.join(videoDir, "hermes-personaforge-persona-experience.en-sub-ja-voice.mp4");
+const experienceAudio = path.join(audioDir, "hermes-personaforge-persona-experience.local-voice.m4a");
+const experienceVideo = path.join(videoDir, "hermes-personaforge-persona-experience.en-sub-local-voice.mp4");
 const finalVideo = path.join(videoDir, "hermes-personaforge-three-minute-demo.en-sub-ja-voice.mp4");
 
 const durationSeconds = Number(process.env.PERSONAFORGE_EXPERIENCE_SECONDS ?? "88");
 const viewport = { width: 1920, height: 1080 };
 
 const spriteFiles = {
-  curious: "Danganronpa_V3_Chiaki_Nanami_Bonus_Mode_Sprites_03.webp",
+  guide: "Danganronpa_V3_Chiaki_Nanami_Bonus_Mode_Sprites_03.webp",
   surprised: "Danganronpa_V3_Chiaki_Nanami_Bonus_Mode_Sprites_13.webp",
   shy: "Danganronpa_V3_Chiaki_Nanami_Bonus_Mode_Sprites_21.webp",
   focused: "Danganronpa_V3_Chiaki_Nanami_Bonus_Mode_Sprites_10.webp",
   thinking: "Danganronpa_V3_Chiaki_Nanami_Bonus_Mode_Sprites_19.webp",
+  happy: "Danganronpa_V3_Chiaki_Nanami_Bonus_Mode_Sprites_05.webp",
 };
 
-const voiceLines = [
+const scenes = [
   {
-    start: 12.2,
-    ja: "えっと……これは、私のペルソナパックの商品ページ、なんだよね。ちょっとびっくりした、と思うよ。",
-    en: "Um... this is my own persona-pack product page, right? I think I am a little surprised.",
+    at: 0,
+    voiceAt: 4.8,
+    sprite: "guide",
+    mode: "product",
+    voice: "nanami_voice_02.wav",
+    userInput: "Nanami, can you look at the persona pack I just bought?",
+    subtitle: "I can see the product page. Wait... this persona pack is about me, right?",
+    status: "vision context: Qiance EC product page",
+    logs: [
+      "$ personaforge chat --persona qiance-companion-starter",
+      "[entitlement] order pf_order_20260627 verified from live commerce proof",
+      "[vision] active window: Qiance EC / AI Companion Persona Pack",
+      "[persona] product entity matched: Nanami companion pack",
+    ],
   },
   {
-    start: 29.2,
-    ja: "支払いが確認されてから、マニフェストが解放される。うん、ちゃんとした作戦だね。",
-    en: "Payment is verified first, then the manifest unlocks. That is a proper plan.",
+    at: 15,
+    voiceAt: 19.6,
+    sprite: "thinking",
+    mode: "checkout",
+    voice: "nanami_voice_18.wav",
+    userInput: "The buyer paid with AliPay. Can Hermes unlock the manifest?",
+    subtitle: "Payment cleared. Hermes unlocks my manifest instead of trusting the browser alone.",
+    status: "Hermes payment reconciliation passed",
+    logs: [
+      "$ hermes verify-payment --source alipay-callback --redacted",
+      "[payment] amount=1.00 CNY, merchant=Qiance, status=PAID",
+      "[margin] revenue covers delivery/runtime cost; unlock=true",
+      "[license] qiance-companion-starter.persona-manifest.json issued",
+    ],
   },
   {
-    start: 45.8,
-    ja: "ライセンスが有効なら、音声、視覚、記憶、表情ルートを起動するよ。少し恥ずかしいけど。",
-    en: "If the license is valid, I can start voice, vision, memory, and expression routes. It is a little embarrassing.",
+    at: 30,
+    voiceAt: 34.8,
+    sprite: "surprised",
+    mode: "baike",
+    voice: "nanami_voice_12.wav",
+    userInput: "Search yourself on the page and tell me what you notice.",
+    subtitle: "It found my profile page. That is a little embarrassing...",
+    status: "self-reference detected",
+    logs: [
+      "$ personaforge vision inspect --window baike",
+      "[browser] query: Nanami Chiaki",
+      "[vision] page title: Nanami Chiaki",
+      "[emotion] self_reference_score=0.94 -> expression route: surprised",
+    ],
   },
   {
-    start: 63.8,
-    ja: "証拠パックも残るから、これはただのチャットじゃない。買われた体験として、監査できるんだ。",
-    en: "The proof pack stays behind, so this is not just chat. It is a purchased experience with an audit trail.",
+    at: 46,
+    voiceAt: 51.0,
+    sprite: "shy",
+    mode: "runtime",
+    voice: "nanami_voice_20.wav",
+    userInput: "So what did the customer actually unlock after purchase?",
+    subtitle: "Voice, vision, memory, and expression routes are online from the licensed manifest.",
+    status: "local runtime online",
+    logs: [
+      "$ personaforge import qiance-companion-starter.persona-manifest.json",
+      "[runtime] Shinsekai-compatible bridge: connected",
+      "[routes] voice=local clip pack, vision=browser+IDE, memory=enabled",
+      "[sprite] guide -> surprised -> shy",
+    ],
   },
   {
-    start: 78.0,
-    ja: "準備できたよ。次は、あなたのページを一緒に見ようね。",
-    en: "I am ready. Next, let us look at your page together.",
+    at: 62,
+    voiceAt: 66.5,
+    sprite: "focused",
+    mode: "proof",
+    voice: "nanami_voice_09.wav",
+    userInput: "Why is this a Hermes business-agent product, not only roleplay?",
+    subtitle: "The audit trail is real: payment, license, runtime trace, safety report, and proof manifest.",
+    status: "proof pack regenerated",
+    logs: [
+      "$ npm test",
+      "Generated payment_reconciliation.json",
+      "Generated persona_license_manifest.json",
+      "Generated runtime_launch_trace.json",
+      "Generated safety_redaction_report.json",
+      "PERSONAFORGE_PROOF_VERIFY_OK",
+    ],
+  },
+  {
+    at: 78,
+    voiceAt: 81.5,
+    sprite: "happy",
+    mode: "ready",
+    voice: "nanami_voice_04.wav",
+    userInput: "Ready for the buyer's companion session?",
+    subtitle: "Session ready. The buyer can now talk with the companion they purchased.",
+    status: "paid companion session ready",
+    logs: [
+      "$ personaforge session open pf_license_84f2d6e64e8b19a107",
+      "[session] paid=true licensed=true runtime=ready",
+      "[boundary] character assets and voice pack remain local-only",
+      "[delivery] emotional AI experience unlocked",
+    ],
   },
 ];
 
@@ -108,57 +185,6 @@ function readDuration(file) {
 }
 
 function buildHtml(spriteUris) {
-  const scenes = [
-    {
-      at: 0,
-      sprite: "curious",
-      mode: "product",
-      prompt: "Can you look at the product page and tell me what you see?",
-      subtitle: "Unlocked persona runtime opens the buyer's product page.",
-      status: "persona manifest imported",
-    },
-    {
-      at: 12,
-      sprite: "surprised",
-      mode: "product",
-      prompt: "That product page is about you. Does the runtime understand it?",
-      subtitle: voiceLines[0].en,
-      status: "vision: self-reference detected",
-    },
-    {
-      at: 29,
-      sprite: "thinking",
-      mode: "checkout",
-      prompt: "Hermes only wakes the persona after payment clears. Is that visible?",
-      subtitle: voiceLines[1].en,
-      status: "payment: AliPay paid evidence accepted",
-    },
-    {
-      at: 46,
-      sprite: "shy",
-      mode: "runtime",
-      prompt: "What does the buyer receive after the manifest unlocks?",
-      subtitle: voiceLines[2].en,
-      status: "runtime: voice + vision + memory + sprite route",
-    },
-    {
-      at: 64,
-      sprite: "focused",
-      mode: "proof",
-      prompt: "Why is this a Hermes business-agent product, not only roleplay?",
-      subtitle: voiceLines[3].en,
-      status: "proof: payment -> license -> runtime -> safety",
-    },
-    {
-      at: 78,
-      sprite: "shy",
-      mode: "ready",
-      prompt: "Ready for a customer session?",
-      subtitle: voiceLines[4].en,
-      status: "session ready, asset boundary enforced",
-    },
-  ];
-
   return `<!doctype html>
 <html>
 <head>
@@ -171,270 +197,382 @@ function buildHtml(spriteUris) {
       width: 100vw;
       height: 100vh;
       overflow: hidden;
-      background: #05070a;
-      color: #fffaf0;
+      background: #101317;
+      color: #d4d4d4;
       font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     }
-    .stage {
+    .desktop {
       position: relative;
       width: 100vw;
       height: 100vh;
       background:
-        radial-gradient(circle at 72% 20%, rgba(91, 206, 250, 0.16), transparent 28%),
-        radial-gradient(circle at 18% 86%, rgba(255, 205, 86, 0.11), transparent 32%),
-        linear-gradient(120deg, #06080c 0%, #101822 56%, #07100f 100%);
+        linear-gradient(180deg, rgba(255,255,255,.03), transparent 16%),
+        #15181d;
     }
-    .topbar {
+    .titlebar {
       position: absolute;
-      left: 32px;
-      right: 32px;
-      top: 24px;
-      height: 74px;
-      display: flex;
+      inset: 0 0 auto 0;
+      height: 36px;
+      display: grid;
+      grid-template-columns: 210px 1fr 260px;
       align-items: center;
-      justify-content: space-between;
-      border: 1px solid rgba(152, 176, 172, .22);
-      border-radius: 8px;
-      padding: 0 22px;
-      background: rgba(8, 12, 17, .72);
-      box-shadow: 0 18px 70px rgba(0,0,0,.42);
-      backdrop-filter: blur(14px);
+      padding: 0 14px;
+      color: #cbd5e1;
+      background: #111418;
+      border-bottom: 1px solid #282c34;
+      font-size: 13px;
     }
-    .brand { display: flex; gap: 16px; align-items: center; }
-    .mark {
-      width: 46px; height: 46px; border-radius: 8px;
-      display: grid; place-items: center;
-      background: linear-gradient(135deg, #67e8c9, #ffd86b);
-      color: #07100f; font-size: 24px; font-weight: 900;
-    }
-    .brand strong { display:block; font-size: 28px; line-height: 1; letter-spacing: 0; }
-    .brand span { display:block; margin-top: 5px; color: #d5e6df; font-size: 13px; text-transform: uppercase; }
-    .chips { display:flex; gap: 12px; align-items:center; }
-    .chips span {
-      border: 1px solid rgba(255,255,255,.15);
-      border-radius: 8px;
-      padding: 9px 12px;
-      background: rgba(255,255,255,.05);
-      color: #ecfdf5;
-      font-size: 14px;
-      font-weight: 700;
-    }
-    .browser {
+    .titlebar strong { color: #e2e8f0; font-weight: 700; }
+    .titlebar .center { text-align: center; color: #9aa4b2; }
+    .window-buttons { justify-self: end; display: flex; gap: 10px; }
+    .window-buttons i { width: 12px; height: 12px; border-radius: 99px; background: #64748b; }
+    .window-buttons i:nth-child(1) { background: #22c55e; }
+    .window-buttons i:nth-child(2) { background: #f59e0b; }
+    .window-buttons i:nth-child(3) { background: #ef4444; }
+    .activity {
       position: absolute;
-      left: 42px;
-      top: 128px;
-      width: 1010px;
-      height: 660px;
-      border: 1px solid rgba(166, 185, 182, .22);
-      border-radius: 8px;
+      left: 0;
+      top: 36px;
+      bottom: 0;
+      width: 56px;
+      background: #181b20;
+      border-right: 1px solid #282c34;
+      display: grid;
+      align-content: start;
+      gap: 18px;
+      padding-top: 18px;
+      justify-items: center;
+    }
+    .activity span {
+      width: 28px; height: 28px;
+      display: grid; place-items: center;
+      border-radius: 7px;
+      color: #94a3b8;
+      font-size: 18px;
+    }
+    .activity span.active { color: #f8fafc; background: #2b313a; }
+    .sidebar {
+      position: absolute;
+      left: 56px;
+      top: 36px;
+      bottom: 260px;
+      width: 260px;
+      background: #1e2229;
+      border-right: 1px solid #2b313a;
+      padding: 16px 14px;
+      color: #a7b0bd;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 13px;
+    }
+    .sidebar h3 {
+      margin: 0 0 14px;
+      color: #e2e8f0;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+    }
+    .tree { display: grid; gap: 7px; }
+    .tree div { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .tree .folder { color: #dbeafe; }
+    .tree .selected {
+      margin-left: -6px;
+      padding: 5px 6px;
+      border-radius: 5px;
+      background: #2b313a;
+      color: #fef3c7;
+    }
+    .editor {
+      position: absolute;
+      left: 316px;
+      right: 0;
+      top: 36px;
+      bottom: 260px;
+      background: #111418;
       overflow: hidden;
+    }
+    .tabs {
+      height: 42px;
+      display: flex;
+      align-items: end;
+      background: #181b20;
+      border-bottom: 1px solid #2b313a;
+      padding-left: 8px;
+    }
+    .tab {
+      height: 36px;
+      padding: 9px 16px 0;
+      border: 1px solid #2b313a;
+      border-bottom: 0;
+      background: #111418;
+      color: #d4d4d4;
+      font-size: 13px;
+    }
+    .code {
+      position: absolute;
+      inset: 42px 0 0 0;
+      padding: 22px 34px;
+      color: #cbd5e1;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 16px;
+      line-height: 1.62;
+    }
+    .line span.kw { color: #7dd3fc; }
+    .line span.fn { color: #f9a8d4; }
+    .line span.str { color: #bbf7d0; }
+    .line span.cm { color: #7c8594; }
+    .terminal {
+      position: absolute;
+      left: 56px;
+      right: 0;
+      bottom: 0;
+      height: 260px;
+      background: #080b10;
+      border-top: 1px solid #2b313a;
+      display: grid;
+      grid-template-columns: 1fr 360px;
+    }
+    .terminal-main {
+      padding: 15px 20px;
+      color: #d1fae5;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 15px;
+      line-height: 1.42;
+      overflow: hidden;
+    }
+    .terminal-main .dim { color: #94a3b8; }
+    .terminal-side {
+      border-left: 1px solid #24303a;
+      padding: 16px 18px;
+      display: grid;
+      align-content: start;
+      gap: 10px;
+      color: #cbd5e1;
+      font-size: 14px;
+    }
+    .terminal-side div {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 9px 10px;
+      border: 1px solid #24303a;
+      border-radius: 7px;
+      background: #0d1117;
+    }
+    .terminal-side span { color: #67e8c9; }
+    .preview {
+      position: absolute;
+      left: 350px;
+      top: 108px;
+      width: 640px;
+      height: 386px;
+      border-radius: 8px;
       background: #f8fafc;
       color: #111827;
-      box-shadow: 0 28px 96px rgba(0,0,0,.45);
+      overflow: hidden;
+      box-shadow: 0 30px 90px rgba(0,0,0,.46);
+      border: 1px solid rgba(203,213,225,.38);
     }
-    .browserbar {
-      height: 44px;
-      display:flex; align-items:center; gap: 8px;
-      background: #e8edf3;
-      padding: 0 16px;
-      color: #304050;
-      font-size: 13px;
-      font-weight: 700;
-    }
-    .dot { width: 10px; height: 10px; border-radius: 99px; background: #ef4444; }
-    .dot:nth-child(2) { background: #f59e0b; }
-    .dot:nth-child(3) { background: #22c55e; }
-    .url {
-      margin-left: 10px; flex: 1;
-      border-radius: 7px;
-      background: #fff;
-      padding: 7px 12px;
+    .previewbar {
+      height: 38px;
+      background: #e5e7eb;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 0 12px;
+      font-size: 12px;
       color: #475569;
     }
-    .browserbody {
-      position: relative;
-      height: calc(100% - 44px);
-      padding: 34px 42px;
-      background: #fbfbfd;
+    .previewbar i { width: 9px; height: 9px; border-radius: 99px; background: #ef4444; }
+    .previewbar i:nth-child(2) { background: #f59e0b; }
+    .previewbar i:nth-child(3) { background: #22c55e; }
+    .previewbar .url {
+      flex: 1;
+      background: #fff;
+      border-radius: 6px;
+      padding: 5px 8px;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
     }
-    .store-head {
-      height: 58px;
-      display:flex; justify-content:space-between; align-items:center;
-      border-bottom: 1px solid #e5e7eb;
-      margin-bottom: 28px;
-    }
-    .logo { font-size: 28px; font-weight: 900; color: #1f2937; }
-    .nav { display:flex; gap: 24px; color:#64748b; font-size:15px; }
-    .product-layout { display:grid; grid-template-columns: 350px 1fr; gap: 38px; align-items:start; }
-    .product-cover {
-      height: 360px;
+    .previewbody { height: calc(100% - 38px); padding: 22px; }
+    .store-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; }
+    .store-head strong { font-size: 23px; color: #0f172a; }
+    .store-head span { color: #64748b; font-size: 12px; font-weight: 700; }
+    .product-grid { display: grid; grid-template-columns: 190px 1fr; gap: 24px; align-items: start; }
+    .cover {
+      height: 222px;
       border-radius: 8px;
-      background:
-        linear-gradient(135deg, rgba(103, 232, 201, .22), rgba(255, 216, 107, .12)),
-        #f1f5f9;
-      display:grid; place-items:center;
-      border: 1px solid #e5e7eb;
-    }
-    .cover-icon { width: 150px; height: 150px; border-radius: 32px; display:grid; place-items:center; background:#111827; color:#67e8c9; font-size:68px; }
-    .product-copy span { color:#64748b; text-transform:uppercase; font-weight:800; font-size:13px; }
-    .product-copy h2 { font-size: 42px; line-height:1.02; margin: 10px 0 16px; color:#111827; letter-spacing:0; }
-    .product-copy p { font-size: 18px; line-height: 1.5; color:#334155; max-width: 500px; }
-    .price { font-size: 40px; font-weight: 900; color:#111827; margin: 22px 0; }
-    .buy { border:0; border-radius:7px; background:#1f9bd1; color:white; font-weight:900; font-size:20px; padding:16px 22px; }
-    .checkout-grid { display:grid; grid-template-columns: 1fr 1fr; gap: 22px; margin-top: 24px; }
-    .pay-card {
-      border: 2px solid #cbd5e1;
-      border-radius: 8px;
-      height: 210px;
-      display:grid; place-items:center;
-      background:#fff;
-    }
-    .pay-card.active { border-color:#0ea5e9; box-shadow:0 0 0 4px rgba(14,165,233,.12); }
-    .pay-card strong { font-size: 36px; color:#0f172a; }
-    .pay-card em { color:#64748b; font-style:normal; font-weight:800; }
-    .manifest {
-      display:grid; gap: 12px; margin-top: 16px;
-      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-    }
-    .manifest div {
-      border:1px solid #d8dee7; border-radius:8px; padding:12px 14px; background:#fff;
-      display:flex; justify-content:space-between; gap:18px;
-    }
-    .manifest span { color:#64748b; }
-    .manifest strong { color:#0f172a; }
-    .proof-list { display:grid; gap:14px; margin-top: 10px; }
-    .proof-list article {
-      border: 1px solid #d8dee7;
-      border-radius: 8px;
-      padding: 16px 18px;
-      background:#fff;
-      display:flex; justify-content:space-between; align-items:center;
-      font-weight:800;
-      color:#111827;
-    }
-    .proof-list em { color:#059669; font-style:normal; }
-    .runtime-terminal {
-      height: 315px;
-      border-radius: 8px;
-      background:#080d12;
-      color:#d1fae5;
-      padding: 18px;
-      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-      font-size: 17px;
-      line-height: 1.62;
-      box-shadow: inset 0 0 0 1px rgba(148, 163, 184, .18);
-    }
-    .prompt {
-      position: absolute;
-      left: 72px;
-      right: 930px;
-      bottom: 64px;
-      min-height: 96px;
-      border-radius: 8px;
-      border: 1px solid rgba(112, 232, 201, .34);
-      background: rgba(5, 9, 14, .86);
-      color:#fffaf0;
-      padding: 20px 24px;
-      font-size: 26px;
-      line-height: 1.25;
-      font-weight: 760;
-      box-shadow: 0 22px 80px rgba(0,0,0,.45);
-    }
-    .prompt span { display:block; color:#67e8c9; font-size:13px; text-transform:uppercase; margin-bottom:8px; }
-    .persona {
-      position:absolute;
-      right: 24px;
-      bottom: -80px;
-      width: 760px;
-      height: 1030px;
-      display:grid;
-      align-items:end;
-      justify-items:center;
-      pointer-events:none;
-    }
-    .persona img {
-      max-height: 960px;
-      max-width: 760px;
-      object-fit:contain;
-      filter: drop-shadow(0 34px 54px rgba(0,0,0,.62));
-      transform-origin: center bottom;
-      animation: breathe 3.6s ease-in-out infinite;
-    }
-    @keyframes breathe { 0%,100%{ transform: translateY(0) scale(1); } 50%{ transform: translateY(-8px) scale(1.012); } }
-    .nameplate {
-      position:absolute;
-      right: 535px;
-      bottom: 282px;
-      color:#ffb7c5;
-      text-shadow: 0 4px 16px rgba(0,0,0,.62);
-      font-size: 39px;
+      display: grid;
+      place-items: center;
+      color: #06251d;
+      background: linear-gradient(135deg, #86efac, #fde68a);
+      font-size: 56px;
       font-weight: 900;
     }
-    .speech {
-      position:absolute;
-      right: 64px;
-      bottom: 112px;
-      width: 770px;
-      min-height: 156px;
+    .copy h2 { margin: 2px 0 10px; font-size: 30px; line-height: 1.05; color: #0f172a; }
+    .copy p { margin: 0; color: #475569; line-height: 1.42; font-size: 15px; }
+    .price { margin-top: 18px; font-size: 29px; color: #0f172a; font-weight: 900; }
+    .pay { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 14px; }
+    .pay div { border: 2px solid #cbd5e1; border-radius: 8px; height: 98px; display: grid; place-items: center; font-size: 23px; font-weight: 900; }
+    .pay .active { border-color: #1677ff; box-shadow: 0 0 0 4px rgba(22,119,255,.12); color: #1677ff; }
+    .article h2 { margin: 0 0 8px; color: #0f172a; font-size: 30px; }
+    .article p { margin: 7px 0; color: #334155; line-height: 1.36; font-size: 14px; }
+    .article .notice { border-left: 4px solid #f9a8d4; padding-left: 12px; color: #be185d; font-weight: 800; }
+    .json {
+      background: #0f172a;
+      color: #d1fae5;
       border-radius: 8px;
-      padding: 25px 30px;
-      background: rgba(8, 10, 13, .74);
-      border: 1px solid rgba(255,255,255,.16);
-      box-shadow: 0 28px 90px rgba(0,0,0,.48);
-      backdrop-filter: blur(12px);
+      padding: 18px;
+      height: 282px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 14px;
+      line-height: 1.5;
     }
-    .speech span { display:block; color:#dbeafe; font-size:17px; font-weight:800; text-transform:uppercase; margin-bottom:10px; }
-    .speech strong { display:block; color:#fffdf5; font-size:34px; line-height:1.16; letter-spacing:0; }
-    .subline {
-      position:absolute;
+    .persona {
+      position: absolute;
+      right: 148px;
+      bottom: 112px;
+      width: 560px;
+      height: 820px;
+      display: grid;
+      align-items: end;
+      justify-items: center;
+      pointer-events: none;
+      z-index: 5;
+    }
+    .persona img {
+      max-width: 560px;
+      max-height: 790px;
+      object-fit: contain;
+      filter: drop-shadow(0 32px 54px rgba(0,0,0,.62));
+      transform-origin: center bottom;
+      animation: breathe 3.2s ease-in-out infinite;
+    }
+    @keyframes breathe { 0%,100%{ transform: translateY(0) scale(1); } 50%{ transform: translateY(-7px) scale(1.012); } }
+    .dialogue {
+      position: absolute;
+      left: 642px;
+      bottom: 332px;
+      width: 660px;
+      min-height: 130px;
+      border-radius: 8px;
+      padding: 22px 24px;
+      background: rgba(255, 255, 255, .91);
+      color: #1f2937;
+      box-shadow: 0 26px 80px rgba(0,0,0,.38);
+      z-index: 8;
+    }
+    .dialogue .name { color: #e879a1; font-size: 21px; font-weight: 900; margin-bottom: 8px; }
+    .dialogue .text { font-size: 25px; line-height: 1.22; font-weight: 720; }
+    .inputbar {
+      position: absolute;
+      left: 370px;
+      right: 360px;
+      bottom: 282px;
+      height: 42px;
+      display: grid;
+      grid-template-columns: 1fr 58px;
+      gap: 10px;
+      z-index: 9;
+    }
+    .inputbar .box {
+      border-radius: 8px;
+      background: rgba(255,255,255,.9);
+      border: 1px solid rgba(255,255,255,.5);
+      color: #64748b;
+      padding: 10px 14px;
+      font-size: 14px;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+    .inputbar .send {
+      border-radius: 99px;
+      background: #f3a3a9;
+      color: #fff;
+      border: 0;
+      font-weight: 900;
+      font-size: 13px;
+    }
+    .subtitle {
+      position: absolute;
       left: 50%;
       transform: translateX(-50%);
-      bottom: 20px;
-      width: min(1500px, calc(100vw - 80px));
+      bottom: 24px;
+      width: min(1540px, calc(100vw - 100px));
       border-radius: 8px;
-      background: rgba(0,0,0,.76);
-      color:#fff;
-      padding: 16px 24px;
-      text-align:center;
-      font-size: 28px;
-      line-height:1.24;
-      font-weight:850;
-      border: 1px solid rgba(255,255,255,.18);
-      box-shadow: 0 20px 60px rgba(0,0,0,.45);
+      background: rgba(0,0,0,.78);
+      border: 1px solid rgba(255,255,255,.17);
+      color: #fff;
+      padding: 15px 24px;
+      text-align: center;
+      font-size: 27px;
+      line-height: 1.24;
+      font-weight: 850;
+      z-index: 10;
     }
-    .side-status {
-      position:absolute;
-      right: 34px;
-      top: 124px;
-      width: 774px;
+    .small-note {
+      position: absolute;
+      right: 30px;
+      top: 54px;
+      z-index: 11;
+      color: #cbd5e1;
+      background: rgba(15, 23, 42, .8);
+      border: 1px solid rgba(148, 163, 184, .24);
       border-radius: 8px;
-      border: 1px solid rgba(103,232,201,.24);
-      background: rgba(4,10,12,.76);
-      padding: 16px 18px;
-      display:grid; gap: 10px;
-      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-      box-shadow:0 22px 78px rgba(0,0,0,.45);
+      padding: 10px 12px;
+      font-size: 13px;
+      font-weight: 800;
     }
-    .side-status div { display:flex; justify-content:space-between; gap:12px; color:#d1fae5; font-size: 16px; }
-    .side-status span { color:#67e8c9; }
   </style>
 </head>
 <body>
-<div class="stage">
-  <div class="topbar">
-    <div class="brand"><div class="mark">PF</div><div><strong>Hermes PersonaForge</strong><span>live persona-pack experience demo</span></div></div>
-    <div class="chips"><span>real EC checkout</span><span>manifest unlock</span><span>Japanese voice</span><span>English subtitles</span></div>
-  </div>
-  <section class="browser">
-    <div class="browserbar"><i class="dot"></i><i class="dot"></i><i class="dot"></i><div class="url" id="url"></div></div>
-    <div class="browserbody" id="browserbody"></div>
+<div class="desktop">
+  <div class="titlebar"><strong>Visual Studio Code</strong><div class="center">Hermes PersonaForge / Shinsekai-compatible runtime</div><div class="window-buttons"><i></i><i></i><i></i></div></div>
+  <div class="activity"><span class="active">E</span><span>S</span><span>G</span><span>R</span><span>T</span></div>
+  <aside class="sidebar">
+    <h3>Explorer</h3>
+    <div class="tree">
+      <div class="folder">PERSONAFORGE</div>
+      <div>  artifacts/</div>
+      <div>  proof/</div>
+      <div class="selected">  qiance-companion-starter.persona-manifest.json</div>
+      <div>  runtime_launch_trace.json</div>
+      <div>  safety_redaction_report.json</div>
+      <div>  scripts/</div>
+      <div>  shinsekai_bridge.ts</div>
+      <div>  live_store_checkout.ts</div>
+    </div>
+  </aside>
+  <main class="editor">
+    <div class="tabs"><div class="tab">shinsekai_bridge.ts</div><div class="tab">persona-manifest.json</div><div class="tab">runtime_launch_trace.json</div></div>
+    <div class="code">
+      <div class="line"><span class="kw">const</span> session = <span class="kw">await</span> hermes.<span class="fn">openPaidPersonaSession</span>({</div>
+      <div class="line">&nbsp;&nbsp;store: <span class="str">"Qiance EC"</span>,</div>
+      <div class="line">&nbsp;&nbsp;product: <span class="str">"AI Companion Persona Pack"</span>,</div>
+      <div class="line">&nbsp;&nbsp;paymentProof: <span class="str">"redacted_alipay_callback"</span>,</div>
+      <div class="line">&nbsp;&nbsp;runtime: <span class="str">"Shinsekai-compatible voice + vision"</span>,</div>
+      <div class="line">});</div>
+      <br/>
+      <div class="line"><span class="cm">// Character assets stay local. The repo ships verifiable business proof.</span></div>
+      <div class="line"><span class="kw">await</span> session.<span class="fn">watchActiveWindow</span>();</div>
+      <div class="line"><span class="kw">await</span> session.<span class="fn">routeExpression</span>(vision.selfReference);</div>
+      <div class="line"><span class="kw">await</span> session.<span class="fn">writeAuditLedger</span>();</div>
+    </div>
+  </main>
+  <section class="preview">
+    <div class="previewbar"><i></i><i></i><i></i><div class="url" id="url"></div></div>
+    <div class="previewbody" id="previewbody"></div>
   </section>
-  <section class="side-status" id="statusPanel"></section>
-  <section class="prompt"><span>you ask</span><div id="prompt"></div></section>
   <section class="persona"><img id="sprite" /></section>
-  <div class="nameplate">七海千秋</div>
-  <section class="speech"><span>Nanami replies · Japanese voice</span><strong id="speechText"></strong></section>
-  <div class="subline" id="subtitle"></div>
+  <section class="dialogue"><div class="name">Nanami</div><div class="text" id="speechText"></div></section>
+  <section class="inputbar"><div class="box" id="inputText"></div><button class="send">send</button></section>
+  <section class="terminal">
+    <div class="terminal-main" id="terminalText"></div>
+    <div class="terminal-side" id="statusPanel"></div>
+  </section>
+  <div class="small-note">local character voice clips + English subtitles</div>
+  <div class="subtitle" id="subtitle"></div>
 </div>
 <script>
 const scenes = ${JSON.stringify(scenes)};
@@ -442,60 +580,80 @@ const sprites = ${JSON.stringify(spriteUris)};
 const start = performance.now();
 const duration = ${durationSeconds};
 
-function productBody() {
-  return '<div class="store-head"><div class="logo">Qiance EC</div><div class="nav"><span>Home</span><span>New products</span><span>Account</span><span>Cart</span></div></div><div class="product-layout"><div class="product-cover"><div class="cover-icon">PF</div></div><div class="product-copy"><span>Digital product</span><h2>AI Companion Persona Pack</h2><p>A paid persona pack: Hermes verifies payment, unlocks a Shinsekai-compatible manifest, and starts a voice-and-vision companion session.</p><div class="price">$1.00</div><button class="buy">Buy pack</button></div></div>';
+function productPreview() {
+  return '<div class="store-head"><strong>Qiance EC</strong><span>real paid digital product</span></div><div class="product-grid"><div class="cover">PF</div><div class="copy"><h2>AI Companion Persona Pack</h2><p>A paid character/persona pack. Hermes verifies payment, unlocks a Shinsekai-compatible manifest, and starts a voice-and-vision companion session.</p><div class="price">$1.00</div></div></div>';
 }
-function checkoutBody() {
-  return '<div class="store-head"><div class="logo">Checkout</div><div class="nav"><span>Billing</span><span>Payment</span><span>Confirm</span></div></div><h2 style="font-size:38px;margin:14px 0 28px;">Select payment method</h2><div class="checkout-grid"><div class="pay-card"><strong>PayPal</strong><em>available</em></div><div class="pay-card active"><strong>AliPay</strong><em>selected / paid proof source</em></div></div><div class="manifest"><div><span>order</span><strong>AI Companion Persona Pack</strong></div><div><span>total</span><strong>$1.00</strong></div><div><span>callback</span><strong>verified, redacted</strong></div></div>';
+function checkoutPreview() {
+  return '<div class="store-head"><strong>Checkout</strong><span>payment method</span></div><h2 style="margin:8px 0 8px;color:#0f172a;font-size:28px;">Payment selected</h2><div class="pay"><div>PayPal</div><div class="active">AliPay</div></div><p style="color:#475569;font-size:15px;line-height:1.45;margin-top:18px;">The demo uses real paid callback evidence from the live store, then redacts customer and payment secrets before proof generation.</p>';
 }
-function runtimeBody() {
-  return '<div class="store-head"><div class="logo">Shinsekai-compatible runtime</div><div class="nav"><span>voice</span><span>vision</span><span>memory</span><span>sprite</span></div></div><div class="runtime-terminal">$ personaforge import qiance-companion-starter.persona-manifest.json<br/>manifest verified: license pf_84f2d6e64e8b19a107<br/>vision context: product page + checkout evidence<br/>sprite route: curious -> surprised -> shy<br/>voice locale: ja-JP<br/>session status: READY</div>';
+function baikePreview() {
+  return '<div class="store-head"><strong>Baidu Baike</strong><span>active browser context</span></div><div class="article"><h2>Nanami Chiaki</h2><p class="notice">Vision match: this page describes the same character/persona pack.</p><p>Profile page text is visible to the local runtime. The companion detects that the page is about herself and switches expression route.</p><p>Runtime response: surprised -> shy.</p></div>';
 }
-function proofBody() {
-  return '<div class="store-head"><div class="logo">Proof pack</div><div class="nav"><span>regenerate</span><span>audit</span><span>safety</span></div></div><div class="proof-list"><article><span>payment_reconciliation.json</span><em>generated</em></article><article><span>persona_margin_gate.json</span><em>generated</em></article><article><span>persona_license_manifest.json</span><em>generated</em></article><article><span>runtime_launch_trace.json</span><em>generated</em></article><article><span>safety_redaction_report.json</span><em>generated</em></article></div>';
+function runtimePreview() {
+  return '<div class="store-head"><strong>Runtime manifest</strong><span>licensed local import</span></div><div class="json">{<br/>&nbsp;&nbsp;"license": "pf_84f2d6e64e8b19a107",<br/>&nbsp;&nbsp;"voice": "local_nanami_clip_pack",<br/>&nbsp;&nbsp;"vision": ["browser", "vscode"],<br/>&nbsp;&nbsp;"memory": "session_scoped",<br/>&nbsp;&nbsp;"sprite_route": ["guide", "surprised", "shy"]<br/>}</div>';
 }
-function readyBody() {
-  return '<div class="store-head"><div class="logo">Customer session ready</div><div class="nav"><span>paid</span><span>licensed</span><span>running</span></div></div><div class="product-layout"><div class="product-cover"><div class="cover-icon">OK</div></div><div class="product-copy"><span>Experience unlocked</span><h2>Voice + vision companion is online.</h2><p>The user bought a product. Hermes verified the business operation. The runtime delivers the emotional experience.</p><div class="price">READY</div></div></div>';
+function proofPreview() {
+  return '<div class="store-head"><strong>Proof pack</strong><span>regenerated by npm test</span></div><div class="json">payment_reconciliation.json  OK<br/>persona_margin_gate.json     OK<br/>persona_license_manifest.json OK<br/>runtime_launch_trace.json     OK<br/>safety_redaction_report.json  OK<br/>proof_manifest.generated.json OK</div>';
+}
+function readyPreview() {
+  return '<div class="store-head"><strong>Customer session</strong><span>ready</span></div><div class="product-grid"><div class="cover">OK</div><div class="copy"><h2>Companion online</h2><p>The customer paid for a product. Hermes verified the operation. The local runtime now delivers the emotional AI experience.</p><div class="price">READY</div></div></div>';
 }
 function bodyFor(mode) {
-  if (mode === 'checkout') return checkoutBody();
-  if (mode === 'runtime') return runtimeBody();
-  if (mode === 'proof') return proofBody();
-  if (mode === 'ready') return readyBody();
-  return productBody();
+  if (mode === 'checkout') return checkoutPreview();
+  if (mode === 'baike') return baikePreview();
+  if (mode === 'runtime') return runtimePreview();
+  if (mode === 'proof') return proofPreview();
+  if (mode === 'ready') return readyPreview();
+  return productPreview();
 }
 function urlFor(mode) {
-  if (mode === 'checkout') return 'https://ec.xingyipoxiao.cloud/zh/onepagecheckout#opc-payment_method';
+  if (mode === 'checkout') return 'https://ec.xingyipoxiao.cloud/zh/checkout/payment';
+  if (mode === 'baike') return 'https://baike.baidu.com/item/Nanami%20Chiaki';
   if (mode === 'runtime') return 'personaforge://runtime/qiance-companion-starter';
-  if (mode === 'proof') return 'repo://artifacts/proof/persona_audit_ledger.json';
+  if (mode === 'proof') return 'repo://artifacts/proof/proof_manifest.generated.json';
   if (mode === 'ready') return 'personaforge://session/ready';
   return 'https://ec.xingyipoxiao.cloud/zh/ai-companion-persona-pack';
 }
 function statusFor(scene) {
   const rows = [
-    ['manifest', 'qiance-companion-starter'],
-    ['scene', scene.mode],
+    ['mode', scene.mode],
     ['status', scene.status],
-    ['asset boundary', 'local sprites and voice are not in Git'],
+    ['voice', scene.voice],
+    ['assets', 'local-only'],
   ];
   return rows.map(([k,v]) => '<div><span>' + k + '</span><strong>' + v + '</strong></div>').join('');
 }
+function typedInput(scene, elapsed) {
+  const progress = Math.max(0, Math.min(1, elapsed / 3.2));
+  const count = Math.floor(scene.userInput.length * progress);
+  return 'You: ' + scene.userInput.slice(0, count) + (progress < 1 ? '|' : '');
+}
+function terminalFor(scene, elapsed) {
+  const visible = Math.max(1, Math.min(scene.logs.length, Math.floor((elapsed - 1.0) / 1.15) + 1));
+  return scene.logs
+    .slice(0, visible)
+    .map((line, index) => '<div class="' + (index === 0 ? '' : 'dim') + '">' + line + '</div>')
+    .join('');
+}
+
 let activeIndex = -1;
 function tick() {
   const elapsed = (performance.now() - start) / 1000;
   let index = 0;
   for (let i = 0; i < scenes.length; i++) if (elapsed >= scenes[i].at) index = i;
   const scene = scenes[index];
+  const sceneElapsed = elapsed - scene.at;
   if (index !== activeIndex) {
     activeIndex = index;
     document.getElementById('sprite').src = sprites[scene.sprite];
     document.getElementById('url').textContent = urlFor(scene.mode);
-    document.getElementById('browserbody').innerHTML = bodyFor(scene.mode);
+    document.getElementById('previewbody').innerHTML = bodyFor(scene.mode);
     document.getElementById('statusPanel').innerHTML = statusFor(scene);
-    document.getElementById('prompt').textContent = scene.prompt;
     document.getElementById('subtitle').textContent = scene.subtitle;
     document.getElementById('speechText').textContent = scene.subtitle;
   }
+  document.getElementById('inputText').textContent = typedInput(scene, sceneElapsed);
+  document.getElementById('terminalText').innerHTML = terminalFor(scene, sceneElapsed);
   if (elapsed < duration + 1) requestAnimationFrame(tick);
 }
 tick();
@@ -507,6 +665,7 @@ tick();
 async function recordExperienceVideo() {
   assertFile(introVideo, "Intro video");
   Object.values(spriteFiles).forEach((file) => assertFile(path.join(localSpriteDir, file), "Local sprite"));
+  scenes.forEach((scene) => assertFile(path.join(localVoiceDir, scene.voice), "Local voice clip"));
 
   const spriteUris = Object.fromEntries(
     Object.entries(spriteFiles).map(([key, file]) => [key, fileDataUri(path.join(localSpriteDir, file))]),
@@ -555,23 +714,6 @@ async function recordExperienceVideo() {
   ]);
 }
 
-function synthesizeLineAudio() {
-  for (let i = 0; i < voiceLines.length; i += 1) {
-    const textPath = path.join(scratchDir, `line-${String(i + 1).padStart(2, "0")}.ja.txt`);
-    const mediaPath = path.join(scratchDir, `line-${String(i + 1).padStart(2, "0")}.mp3`);
-    writeFileSync(textPath, `${voiceLines[i].ja}\n`, "utf8");
-    runInherit(edgeTts, [
-      "--voice",
-      "ja-JP-NanamiNeural",
-      "--rate=-6%",
-      "--file",
-      textPath,
-      "--write-media",
-      mediaPath,
-    ]);
-  }
-}
-
 function buildExperienceAudio() {
   const bgmPath = path.join(audioDir, "hermes-personaforge-live-soft-bed.m4a");
   if (!existsSync(bgmPath)) {
@@ -601,23 +743,21 @@ function buildExperienceAudio() {
   }
 
   const inputs = [];
-  for (let i = 0; i < voiceLines.length; i += 1) {
-    inputs.push("-i", path.join(scratchDir, `line-${String(i + 1).padStart(2, "0")}.mp3`));
-  }
+  scenes.forEach((scene) => inputs.push("-i", path.join(localVoiceDir, scene.voice)));
   inputs.push("-stream_loop", "-1", "-i", bgmPath);
 
-  const filters = voiceLines
-    .map((line, index) => {
-      const delay = Math.round(line.start * 1000);
-      return `[${index}:a]adelay=${delay}:all=1,apad,atrim=0:${durationSeconds},volume=1.25[v${index}]`;
+  const filters = scenes
+    .map((scene, index) => {
+      const delay = Math.round(scene.voiceAt * 1000);
+      return `[${index}:a]aresample=48000,aformat=sample_rates=48000:channel_layouts=stereo,adelay=${delay}:all=1,volume=2.15,apad,atrim=0:${durationSeconds}[v${index}]`;
     })
     .join(";");
-  const bgmIndex = voiceLines.length;
-  const mixInputs = voiceLines.map((_, index) => `[v${index}]`).join("") + "[bgm]";
+  const bgmIndex = scenes.length;
+  const mixInputs = scenes.map((_, index) => `[v${index}]`).join("") + "[bgm]";
   const filter = [
     filters,
-    `[${bgmIndex}:a]atrim=0:${durationSeconds},asetpts=PTS-STARTPTS,volume=0.07[bgm]`,
-    `${mixInputs}amix=inputs=${voiceLines.length + 1}:duration=longest:dropout_transition=2,alimiter=limit=0.95,aformat=sample_rates=48000:channel_layouts=stereo[aout]`,
+    `[${bgmIndex}:a]atrim=0:${durationSeconds},asetpts=PTS-STARTPTS,volume=0.055[bgm]`,
+    `${mixInputs}amix=inputs=${scenes.length + 1}:duration=longest:dropout_transition=2,alimiter=limit=0.95,aformat=sample_rates=48000:channel_layouts=stereo[aout]`,
   ].join(";");
 
   runInherit(ffmpeg, [
@@ -704,7 +844,6 @@ mkdirSync(segmentDir, { recursive: true });
 mkdirSync(scratchDir, { recursive: true });
 
 await recordExperienceVideo();
-synthesizeLineAudio();
 buildExperienceAudio();
 muxExperienceVideo();
 concatFinalVideo();
