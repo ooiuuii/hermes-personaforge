@@ -40,10 +40,6 @@ const coldOpenVideo = path.join(videoDir, "hermes-personaforge-cold-open.en-sub-
 const commerceClip = path.resolve(
   process.env.PERSONAFORGE_COMMERCE_CLIP ?? path.join(videoDir, "segments", "live", "01-live-commerce-checkout.mp4"),
 );
-const productCoverImage = path.resolve(
-  process.env.PERSONAFORGE_PRODUCT_COVER_IMAGE ??
-    path.join(root, "artifacts", "local-character-packs", "qiance-persona-product-cover.webp"),
-);
 const commerceAudio = path.join(audioDir, "hermes-personaforge-commerce-bridge.m4a");
 const commerceVideo = path.join(videoDir, "hermes-personaforge-commerce-bridge.mp4");
 
@@ -1227,7 +1223,6 @@ function muxColdOpenVideo() {
 
 function buildCommerceBridgeVideo() {
   assertFile(commerceClip, "Commerce clip");
-  assertFile(productCoverImage, "Product cover image");
   const duration = readDuration(commerceClip);
   const bridgeDir = path.join(audioDir, "personaforge-commerce-bridge");
   const narration = synthesizeEdgeTtsText({
@@ -1268,18 +1263,14 @@ function buildCommerceBridgeVideo() {
     "-y",
     "-i",
     commerceClip,
-    "-loop",
-    "1",
-    "-i",
-    productCoverImage,
     "-i",
     commerceAudio,
     "-filter_complex",
-    "[0:v]scale=1920:1080,fps=30,setsar=1[base];[1:v]scale=360:360:force_original_aspect_ratio=decrease,pad=360:360:(ow-iw)/2:(oh-ih)/2:color=0xfdf2f8[cover];[base][cover]overlay=462:452:enable='between(t,0,10.8)',format=yuv420p[v]",
+    "[0:v]scale=1920:1080,fps=30,setsar=1,format=yuv420p[v]",
     "-map",
     "[v]",
     "-map",
-    "2:a:0",
+    "1:a:0",
     "-t",
     String(duration),
     "-c:v",
