@@ -13,6 +13,7 @@
     "mix:soft-bgm": "node scripts/add-soft-bgm.mjs",
     "mix:nas-voice": "node scripts/add-nas-voiceover.mjs",
     "mix:live-nas-voice": "node scripts/add-live-nas-voiceover.mjs",
+    "build:three-minute-demo": "node scripts/build-three-minute-demo.mjs",
     "build": "tsc -b && vite build",
     "preview": "vite preview --host 127.0.0.1"
   },

@@ -22,12 +22,14 @@ A customer buys an AI Companion Persona Pack, Hermes verifies payment, unlocks a
 ```text
 GitHub Release: https://github.com/ooiuuii/hermes-personaforge/releases/tag/v0.1-demo
 Direct MP4: https://github.com/ooiuuii/hermes-personaforge/releases/download/v0.1-demo/hermes-personaforge-live-commerce-shinsekai-demo.en.andrew-nas-bgm.mp4
+Extended 3-minute MP4: https://github.com/ooiuuii/hermes-personaforge/releases/download/v0.1-demo/hermes-personaforge-three-minute-demo.en-sub-ja-voice.mp4
 ```
 
 Local generated copy:
 
 ```text
 artifacts/videos/hermes-personaforge-live-commerce-shinsekai-demo.en.andrew-nas-bgm.mp4
+artifacts/videos/hermes-personaforge-three-minute-demo.en-sub-ja-voice.mp4
 ```
 
 ## Demo Story
@@ -103,6 +105,7 @@ $env:PERSONAFORGE_DEMO_EMAIL="customer@example.com"
 $env:PERSONAFORGE_DEMO_PASSWORD="..."
 npm run record:live-demo
 npm run mix:live-nas-voice
+npm run build:three-minute-demo
 ```
 
 This records the real Qiance EC customer flow, stops before making a new payment, then captures a local

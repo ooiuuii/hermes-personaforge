@@ -14,7 +14,7 @@ Fourth standalone submission for @NousResearch's Hermes Agent Accelerated Busine
 
 Foundry = approvals. Sourcing Desk = procurement savings. Commerce Ops = paid-order operations. PersonaForge = paid character packs: a customer buys an AI Companion Persona Pack, Hermes verifies payment, unlocks a manifest download, imports it into a Shinsekai-compatible runtime, and seals proof.
 
-Demo video: https://github.com/ooiuuii/hermes-personaforge/releases/download/v0.1-demo/hermes-personaforge-live-commerce-shinsekai-demo.en.andrew-nas-bgm.mp4
+Demo video: https://github.com/ooiuuii/hermes-personaforge/releases/download/v0.1-demo/hermes-personaforge-three-minute-demo.en-sub-ja-voice.mp4
 
 Repo: https://github.com/ooiuuii/hermes-personaforge
 
@@ -43,7 +43,7 @@ Demo loop:
 
 Important boundary: the submitted repo does not redistribute third-party character packs, sprites, voice checkpoints, model weights, local runtime code, customer PII, or payment credentials. It ships the business workflow and verifier-safe proof artifacts.
 
-Video: https://github.com/ooiuuii/hermes-personaforge/releases/download/v0.1-demo/hermes-personaforge-live-commerce-shinsekai-demo.en.andrew-nas-bgm.mp4
+Video: https://github.com/ooiuuii/hermes-personaforge/releases/download/v0.1-demo/hermes-personaforge-three-minute-demo.en-sub-ja-voice.mp4
 
 Repo: https://github.com/ooiuuii/hermes-personaforge
 
