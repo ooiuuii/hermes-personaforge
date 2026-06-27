@@ -1,0 +1,25 @@
+{
+  "schema": "hermes-personaforge.margin_gate.v1",
+  "generated_at": "2026-06-27T16:00:05+08:00",
+  "input_refs": {
+    "order": "artifacts/input/persona-commerce-order.json",
+    "payment_reconciliation": "artifacts/proof/payment_reconciliation.json"
+  },
+  "economics": {
+    "currency": "CNY",
+    "revenue": 9.9,
+    "estimated_costs": {
+      "license_issuance": 0.18,
+      "storage_delivery": 0.12,
+      "tts_preview": 0.35,
+      "runtime_orchestration": 0.7,
+      "support_reserve": 0.45,
+      "total": 1.8
+    },
+    "gross_profit": 8.1,
+    "gross_margin": 0.82,
+    "minimum_margin": 0.45
+  },
+  "decision": "unlock_persona_pack",
+  "refund_policy": "If payment is verified but entitlement delivery fails, Hermes records the failure and routes the order to refund or human review."
+}

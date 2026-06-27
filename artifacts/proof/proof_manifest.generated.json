@@ -1,0 +1,51 @@
+{
+  "schema": "hermes-personaforge.proof_manifest.v1",
+  "generated_at": "2026-06-27T16:00:30+08:00",
+  "generated_by": "scripts/generate-proof-pack.mjs",
+  "project": "Hermes PersonaForge",
+  "generated_outputs": [
+    {
+      "path": "artifacts/proof/payment_reconciliation.json",
+      "sha256": "08cb22a92f0881b00581255fba08f0042d62277f7db7b3494e8cf6034f29483d"
+    },
+    {
+      "path": "artifacts/proof/persona_margin_gate.json",
+      "sha256": "6950e00ee46edacef263ff4ce338ca0e7a5d2816f83a0c1abcf113d4dc57eb15"
+    },
+    {
+      "path": "artifacts/proof/persona_license_manifest.json",
+      "sha256": "e64f1b24be937ab90e370ec8eab8d06cea92cb002346fbed6caa0a528069d783"
+    },
+    {
+      "path": "artifacts/proof/runtime_launch_trace.json",
+      "sha256": "bc5b27324462dcb1309feabcf87d9a892efdff8fd57e8a30c94a6a503a340bf3"
+    },
+    {
+      "path": "artifacts/proof/safety_redaction_report.json",
+      "sha256": "4f538879077708951d2f6b91addfa3ff03fb6db2aaf0376eadcd4c6ec92ba863"
+    },
+    {
+      "path": "artifacts/proof/persona_audit_ledger.json",
+      "sha256": "ca4bcc4a533b3da4d5774ce19f3a54977a4afdb8dc44402fcb2c6d0507f8bae8"
+    }
+  ],
+  "static_evidence": [
+    {
+      "path": "artifacts/input/persona-commerce-order.json",
+      "sha256": "5960c56ea47f3ff6f22d8bc572f9b0b0b8eadaf45a0f123f52457798262bd756"
+    }
+  ],
+  "verifier_claims": [
+    "A paid store order can unlock a persona pack entitlement.",
+    "Hermes checks margin before delivery work.",
+    "The persona license manifest is hashable and auditable.",
+    "Voice, vision, and sprite-switch runtime delivery is represented in deterministic trace.",
+    "The repo does not redistribute local third-party character assets."
+  ],
+  "commands": {
+    "regenerate": "npm run proof",
+    "verify": "npm test",
+    "run_demo": "npm run dev",
+    "record_demo": "npm run record:demo"
+  }
+}

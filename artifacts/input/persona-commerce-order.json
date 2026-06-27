@@ -1,0 +1,82 @@
+{
+  "schema": "hermes-personaforge.persona_order_input.v1",
+  "captured_at": "2026-06-27T15:58:00+08:00",
+  "project": "Hermes PersonaForge",
+  "relation_to_previous_submissions": {
+    "hermes_foundry": "approval orchestration",
+    "hermes_sourcing_desk": "procurement sourcing and savings proof",
+    "hermes_commerce_ops": "paid e-commerce order operations",
+    "hermes_personaforge": "paid persona-pack entitlement and runtime delivery"
+  },
+  "commerce_source": {
+    "store": "ec.xingyipoxiao.cloud",
+    "merchant": "Deqing Qiance Technology Co., Ltd.",
+    "payment_provider": "Alipay",
+    "status": "paid",
+    "evidence_mode": "redacted_live_payment_snapshot",
+    "note": "The public repo contains verifier-safe payment evidence only. Live merchant credentials, full trade numbers, customer PII, and raw screenshots are not committed."
+  },
+  "order": {
+    "id": "PF-2026-06-27-001",
+    "sku": "persona-pack.qiance-companion.starter",
+    "product": "Qiance Companion Persona Pack",
+    "currency": "CNY",
+    "amount": 9.9,
+    "payment_status": "paid",
+    "order_status": "ready_for_digital_delivery",
+    "callback_paths": {
+      "notify": "/Plugins/PaymentAliPay/Notify",
+      "return": "/Plugins/PaymentAliPay/Return"
+    },
+    "trade_ref_redacted": "20260627-PERSONA-****-PAID",
+    "trade_ref_sha256": "4eabf2b287891b562f2044eb4adad6c7ef6518d5aa9b1057fd307cfcad88d409"
+  },
+  "economics": {
+    "revenue": 9.9,
+    "license_issuance_cost": 0.18,
+    "storage_delivery_cost": 0.12,
+    "tts_preview_cost": 0.35,
+    "runtime_orchestration_cost": 0.7,
+    "support_reserve": 0.45,
+    "minimum_margin": 0.45
+  },
+  "persona_pack": {
+    "pack_id": "qiance-companion-starter",
+    "display_name": "Qiance Companion Starter",
+    "format": "shinsekai-compatible-manifest",
+    "public_assets": [
+      "manifest",
+      "persona prompts",
+      "emotion routing table",
+      "license metadata"
+    ],
+    "local_runtime_capabilities": [
+      "voice",
+      "vision",
+      "sprite_switching",
+      "short_term_memory"
+    ],
+    "demo_scenes": [
+      "customer buys a persona pack",
+      "Hermes verifies paid entitlement",
+      "Hermes unlocks a signed persona manifest",
+      "runtime reads a browser page and reacts with a shy sprite",
+      "audit pack records payment, license, runtime, and asset policy"
+    ],
+    "asset_policy": {
+      "public_repo_redistributes_third_party_character_assets": false,
+      "committed_assets_are_original_or_redacted": true,
+      "local_character_packs_stay_out_of_git": true,
+      "note": "A local Shinsekai-compatible character pack may be used for private video capture, but this repo ships only a generic licensed persona-pack flow."
+    }
+  },
+  "hermes_runtime": {
+    "model_lane": "Hermes/Nemotron-compatible agent lane",
+    "guardrails": [
+      "paid-before-unlock",
+      "no copyrighted asset redistribution",
+      "refund-on-failed-delivery"
+    ],
+    "irreversible_actions": "blocked until entitlement and delivery proof are present"
+  }
+}

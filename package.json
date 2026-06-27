@@ -1,0 +1,30 @@
+{
+  "name": "hermes-personaforge",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 127.0.0.1",
+    "proof": "node scripts/generate-proof-pack.mjs",
+    "test": "node scripts/generate-proof-pack.mjs && node scripts/verify-proof-pack.mjs",
+    "record:demo": "node scripts/record-full-demo.mjs",
+    "record:demo:zh": "node -e \"process.env.DEMO_LANG='zh'; import('./scripts/record-full-demo.mjs')\"",
+    "mix:soft-bgm": "node scripts/add-soft-bgm.mjs",
+    "mix:nas-voice": "node scripts/add-nas-voiceover.mjs",
+    "build": "tsc -b && vite build",
+    "preview": "vite preview --host 127.0.0.1"
+  },
+  "dependencies": {
+    "lucide-react": "^0.468.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.61.0",
+    "@types/react": "^19.2.17",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^6.0.2",
+    "typescript": "^6.0.3",
+    "vite": "^8.0.16"
+  }
+}

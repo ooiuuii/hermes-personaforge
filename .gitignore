@@ -1,0 +1,39 @@
+.env
+.env.*
+!.env.example
+node_modules/
+dist/
+build/
+*.log
+*.tsbuildinfo
+
+# Generated media. Upload videos separately or attach them as release assets.
+artifacts/audio/
+artifacts/videos/
+artifacts/screenshots/
+artifacts/.auth/
+
+# Local-only persona runtime assets. Public proof uses redacted manifests only.
+artifacts/local-character-packs/
+artifacts/runtime-captures/
+*.char
+*.ckpt
+*.pth
+*.onnx
+*.safetensors
+*.webp
+*.wav
+*.aac
+
+# Local dependency snapshots and caches.
+vendor/
+*.tar.gz
+*.zip
+.vite/
+.cache/
+
+# OS/editor noise.
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/

@@ -1,0 +1,47 @@
+{
+  "schema": "hermes-personaforge.runtime_launch_trace.v1",
+  "generated_at": "2026-06-27T16:00:15+08:00",
+  "license_id": "pf_394947b32138269bcb",
+  "runtime": {
+    "compatibility": "Shinsekai-style visual companion runtime",
+    "voice_enabled": true,
+    "vision_enabled": true,
+    "sprite_switching_enabled": true,
+    "browser_context_enabled": true,
+    "local_assets_required_for_full_visual_demo": true
+  },
+  "trace_mode": "deterministic_demo_replay",
+  "events": [
+    {
+      "time": "00:00",
+      "actor": "Hermes payment verifier",
+      "command": "verify paid entitlement for PF-2026-06-27-001",
+      "result": "payment evidence accepted"
+    },
+    {
+      "time": "00:06",
+      "actor": "Hermes license worker",
+      "command": "issue persona license pf_394947b32138269bcb",
+      "result": "persona manifest unlocked"
+    },
+    {
+      "time": "00:12",
+      "actor": "Persona runtime",
+      "command": "load manifest qiance-companion-starter",
+      "result": "voice, vision, memory, and sprite routing enabled"
+    },
+    {
+      "time": "00:24",
+      "actor": "Vision sidecar",
+      "command": "inspect browser page about the persona",
+      "result": "self-reference detected; emotion route=shy"
+    },
+    {
+      "time": "00:31",
+      "actor": "Voice sidecar",
+      "command": "synthesize shy response",
+      "result": "audio response generated in local runtime"
+    }
+  ],
+  "user_visible_result": "A paid persona pack becomes a working voice-and-vision companion session, while Hermes records license and delivery proof."
+}

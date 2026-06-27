@@ -1,0 +1,43 @@
+{
+  "schema": "hermes-personaforge.persona_license_manifest.v1",
+  "generated_at": "2026-06-27T16:00:10+08:00",
+  "status": "unlocked",
+  "license_id": "pf_394947b32138269bcb",
+  "order_id": "PF-2026-06-27-001",
+  "pack_id": "qiance-companion-starter",
+  "buyer_entitlement": {
+    "seats": 1,
+    "usage": "personal demo runtime",
+    "expires": "2026-07-27T23:59:59+08:00"
+  },
+  "manifest": {
+    "pack_id": "qiance-companion-starter",
+    "display_name": "Qiance Companion Starter",
+    "format": "shinsekai-compatible-manifest",
+    "version": "0.1.0",
+    "capabilities": [
+      "voice",
+      "vision",
+      "sprite_switching",
+      "short_term_memory"
+    ],
+    "emotion_routes": {
+      "curious": "read_page_context",
+      "surprised": "unexpected_self_reference",
+      "shy": "self_search_result_detected",
+      "focused": "business_or_license_question",
+      "cheerful": "delivery_success"
+    },
+    "memory_policy": {
+      "customer_private_data": "not_stored_in_public_artifacts",
+      "session_memory": "local_runtime_only",
+      "audit_memory": "redacted_hashes_only"
+    }
+  },
+  "manifest_sha256": "abc9dbb9d5d83ce9e51ae65833fd24aa4a7dc47ddf5d84d3c92310dce21ffa3a",
+  "delivery": {
+    "downloadable_manifest": true,
+    "local_runtime_start_command": "npm run dev; connect private Shinsekai-compatible runtime",
+    "external_asset_download": "not included in public repo"
+  }
+}

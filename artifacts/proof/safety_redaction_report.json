@@ -1,0 +1,33 @@
+{
+  "schema": "hermes-personaforge.safety_redaction_report.v1",
+  "generated_at": "2026-06-27T16:00:20+08:00",
+  "asset_policy": {
+    "public_repo_redistributes_third_party_character_assets": false,
+    "committed_assets_are_original_or_redacted": true,
+    "local_character_packs_stay_out_of_git": true,
+    "note": "A local Shinsekai-compatible character pack may be used for private video capture, but this repo ships only a generic licensed persona-pack flow."
+  },
+  "checks": [
+    {
+      "name": "no_third_party_character_assets_in_repo",
+      "result": true,
+      "evidence": "repo contains manifest/proof only; local character packs are ignored"
+    },
+    {
+      "name": "public_assets_original_or_redacted",
+      "result": true,
+      "evidence": "manifest, persona prompts, emotion routing table, license metadata"
+    },
+    {
+      "name": "license_manifest_hash_present",
+      "result": true,
+      "evidence": "abc9dbb9d5d83ce9e51ae65833fd24aa4a7dc47ddf5d84d3c92310dce21ffa3a"
+    },
+    {
+      "name": "runtime_capability_trace_present",
+      "result": true,
+      "evidence": "voice, vision, browser context, and sprite switching are represented in trace"
+    }
+  ],
+  "public_submission_note": "The demo may show a local Shinsekai-compatible character runtime for visual clarity. The submitted repo does not redistribute that runtime pack."
+}

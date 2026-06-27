@@ -1,0 +1,50 @@
+{
+  "schema": "hermes-personaforge.audit_ledger.v1",
+  "generated_at": "2026-06-27T16:00:25+08:00",
+  "ledger": [
+    {
+      "time": "2026-06-27T15:58:00+08:00",
+      "actor": "Qiance store",
+      "action": "Paid digital product order captured",
+      "result": "PF-2026-06-27-001 9.90 CNY"
+    },
+    {
+      "time": "2026-06-27T16:00:00+08:00",
+      "actor": "Hermes payment verifier",
+      "action": "Reconciled redacted payment proof",
+      "result": "payment_verified_for_persona_entitlement"
+    },
+    {
+      "time": "2026-06-27T16:00:05+08:00",
+      "actor": "Hermes margin gate",
+      "action": "Checked paid order economics",
+      "result": "82% gross margin; unlock_persona_pack"
+    },
+    {
+      "time": "2026-06-27T16:00:10+08:00",
+      "actor": "Hermes license worker",
+      "action": "Issued persona pack license",
+      "result": "pf_394947b32138269bcb"
+    },
+    {
+      "time": "2026-06-27T16:00:15+08:00",
+      "actor": "Persona runtime",
+      "action": "Started voice-and-vision session",
+      "result": "A paid persona pack becomes a working voice-and-vision companion session, while Hermes records license and delivery proof."
+    },
+    {
+      "time": "2026-06-27T16:00:20+08:00",
+      "actor": "Safety sidecar",
+      "action": "Checked asset and redaction policy",
+      "result": "The demo may show a local Shinsekai-compatible character runtime for visual clarity. The submitted repo does not redistribute that runtime pack."
+    }
+  ],
+  "proof_links": {
+    "payment_reconciliation": "artifacts/proof/payment_reconciliation.json",
+    "margin_gate": "artifacts/proof/persona_margin_gate.json",
+    "license_manifest": "artifacts/proof/persona_license_manifest.json",
+    "runtime_trace": "artifacts/proof/runtime_launch_trace.json",
+    "safety_report": "artifacts/proof/safety_redaction_report.json"
+  },
+  "conclusion": "Hermes PersonaForge extends a real paid commerce rail into paid persona-pack delivery: verify money, decide margin, unlock license, start runtime, and seal proof."
+}

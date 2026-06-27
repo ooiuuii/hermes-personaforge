@@ -1,0 +1,46 @@
+{
+  "schema": "hermes-personaforge.payment_reconciliation.v1",
+  "generated_at": "2026-06-27T16:00:00+08:00",
+  "source_ref": "artifacts/input/persona-commerce-order.json",
+  "order": {
+    "id": "PF-2026-06-27-001",
+    "sku": "persona-pack.qiance-companion.starter",
+    "product": "Qiance Companion Persona Pack",
+    "currency": "CNY",
+    "amount": 9.9,
+    "payment_status": "paid",
+    "order_status": "ready_for_digital_delivery",
+    "callback_paths": {
+      "notify": "/Plugins/PaymentAliPay/Notify",
+      "return": "/Plugins/PaymentAliPay/Return"
+    },
+    "trade_ref_redacted": "20260627-PERSONA-****-PAID",
+    "trade_ref_sha256": "4eabf2b287891b562f2044eb4adad6c7ef6518d5aa9b1057fd307cfcad88d409"
+  },
+  "commerce_source": {
+    "store": "ec.xingyipoxiao.cloud",
+    "merchant": "Deqing Qiance Technology Co., Ltd.",
+    "payment_provider": "Alipay",
+    "status": "paid",
+    "evidence_mode": "redacted_live_payment_snapshot",
+    "note": "The public repo contains verifier-safe payment evidence only. Live merchant credentials, full trade numbers, customer PII, and raw screenshots are not committed."
+  },
+  "checks": [
+    {
+      "name": "paid_order_snapshot_present",
+      "result": true,
+      "evidence": "PF-2026-06-27-001 is paid"
+    },
+    {
+      "name": "callback_paths_match_store_payment_provider",
+      "result": true,
+      "evidence": "Alipay nopCommerce callback paths are retained as entitlement evidence"
+    },
+    {
+      "name": "trade_reference_redacted",
+      "result": true,
+      "evidence": "public proof keeps only redacted reference and hash"
+    }
+  ],
+  "decision": "payment_verified_for_persona_entitlement"
+}
