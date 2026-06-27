@@ -174,8 +174,7 @@ if (!existsSync(rawVoice) || forceTts) {
   runInherit(edgeTts, [
     "--voice",
     voice,
-    "--rate",
-    voiceRate,
+    `--rate=${voiceRate}`,
     "--file",
     textFile,
     "--write-media",
