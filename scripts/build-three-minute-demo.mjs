@@ -7,6 +7,7 @@ import path from "node:path";
 const root = process.cwd();
 const ffmpeg = process.env.FFMPEG_BIN ?? "ffmpeg";
 const ffprobe = process.env.FFPROBE_BIN ?? "ffprobe";
+const edgeTts = process.env.EDGE_TTS_BIN ?? "edge-tts";
 
 const videoDir = path.join(root, "artifacts", "videos");
 const audioDir = path.join(root, "artifacts", "audio");
@@ -52,7 +53,8 @@ const spriteFiles = {
 const scenes = [
   {
     at: 0,
-    voiceAt: 4.8,
+    userVoiceAt: 0.35,
+    voiceAt: 6.7,
     sprite: "guide",
     mode: "product",
     voice: "nanami_voice_02.wav",
@@ -62,14 +64,19 @@ const scenes = [
     status: "vision context: Qiance EC product page",
     logs: [
       "$ personaforge chat --persona qiance-companion-starter",
+      "$ edge-tts --voice en-US-AndrewNeural --write-media prompt-01.mp3",
+      "[user-voice] prompt spoken while typing",
       "[entitlement] order pf_order_20260627 verified from live commerce proof",
       "[vision] active window: Qiance EC / AI Companion Persona Pack",
       "[persona] product entity matched: Nanami companion pack",
+      "$ curl http://127.0.0.1:9880/tts -> line-01.wav",
+      "[gpt-sovits] synthesized matching character response",
     ],
   },
   {
     at: 15,
-    voiceAt: 19.6,
+    userVoiceAt: 15.35,
+    voiceAt: 21.8,
     sprite: "thinking",
     mode: "checkout",
     voice: "nanami_voice_18.wav",
@@ -79,31 +86,41 @@ const scenes = [
     status: "Hermes payment reconciliation passed",
     logs: [
       "$ hermes verify-payment --source alipay-callback --redacted",
+      "$ edge-tts --voice en-US-AndrewNeural --write-media prompt-02.mp3",
       "[payment] amount=1.00 CNY, merchant=Qiance, status=PAID",
       "[margin] revenue covers delivery/runtime cost; unlock=true",
       "[license] qiance-companion-starter.persona-manifest.json issued",
+      "$ curl http://127.0.0.1:9880/tts -> line-02.wav",
+      "[gpt-sovits] synthesized unlock explanation",
     ],
   },
   {
     at: 30,
-    voiceAt: 34.8,
+    userVoiceAt: 30.35,
+    voiceAt: 37.2,
     sprite: "surprised",
-    mode: "baike",
+    mode: "search",
     voice: "nanami_voice_12.wav",
-    jaSpeech: "自分のページを見つけちゃった。ちょっと、恥ずかしいかも。",
-    userInput: "Search yourself on the page and tell me what you notice.",
-    subtitle: "It found my profile page. That is a little embarrassing...",
+    jaSpeech: "検索ページから自分のプロフィールを見つけちゃった。細かいことまで書いてあって、ちょっと恥ずかしいかも。",
+    userInput: "Open a search page for yourself, then read what is on screen.",
+    subtitle: "It found my profile from the search page, even tiny personal details. That is embarrassing...",
     status: "self-reference detected",
     logs: [
-      "$ personaforge vision inspect --window baike",
-      "[browser] query: Nanami Chiaki",
-      "[vision] page title: Nanami Chiaki",
+      "$ personaforge browser.open 'https://www.baidu.com/s?wd=Nanami+Chiaki'",
+      "$ edge-tts --voice en-US-AndrewNeural --write-media prompt-03.mp3",
+      "[browser] search results loaded",
+      "[vision] screenshot captured from active browser window",
+      "[ocr] result title: Nanami Chiaki - Baidu Baike",
+      "[screen-read] profile page includes detailed character notes",
       "[emotion] self_reference_score=0.94 -> expression route: surprised",
+      "$ curl http://127.0.0.1:9880/tts -> line-03.wav",
+      "[gpt-sovits] synthesized embarrassed response",
     ],
   },
   {
     at: 46,
-    voiceAt: 51.0,
+    userVoiceAt: 46.35,
+    voiceAt: 53.4,
     sprite: "shy",
     mode: "runtime",
     voice: "nanami_voice_20.wav",
@@ -113,14 +130,18 @@ const scenes = [
     status: "local runtime online",
     logs: [
       "$ personaforge import qiance-companion-starter.persona-manifest.json",
+      "$ edge-tts --voice en-US-AndrewNeural --write-media prompt-04.mp3",
       "[runtime] Shinsekai-compatible bridge: connected",
-      "[routes] voice=local clip pack, vision=browser+IDE, memory=enabled",
+      "[routes] voice=GPT-SoVITS synthesized line, vision=browser+IDE, memory=enabled",
       "[sprite] guide -> surprised -> shy",
+      "$ curl http://127.0.0.1:9880/tts -> line-04.wav",
+      "[gpt-sovits] synthesized runtime explanation",
     ],
   },
   {
     at: 62,
-    voiceAt: 66.5,
+    userVoiceAt: 62.35,
+    voiceAt: 70.0,
     sprite: "focused",
     mode: "proof",
     voice: "nanami_voice_09.wav",
@@ -130,16 +151,20 @@ const scenes = [
     status: "proof pack regenerated",
     logs: [
       "$ npm test",
+      "$ edge-tts --voice en-US-AndrewNeural --write-media prompt-05.mp3",
       "Generated payment_reconciliation.json",
       "Generated persona_license_manifest.json",
       "Generated runtime_launch_trace.json",
       "Generated safety_redaction_report.json",
       "PERSONAFORGE_PROOF_VERIFY_OK",
+      "$ curl http://127.0.0.1:9880/tts -> line-05.wav",
+      "[gpt-sovits] synthesized audit explanation",
     ],
   },
   {
     at: 78,
-    voiceAt: 81.5,
+    userVoiceAt: 78.35,
+    voiceAt: 82.4,
     sprite: "happy",
     mode: "ready",
     voice: "nanami_voice_04.wav",
@@ -149,9 +174,11 @@ const scenes = [
     status: "paid companion session ready",
     logs: [
       "$ personaforge session open pf_license_84f2d6e64e8b19a107",
+      "$ edge-tts --voice en-US-AndrewNeural --write-media prompt-06.mp3",
       "[session] paid=true licensed=true runtime=ready",
       "[boundary] character assets and voice pack remain local-only",
       "[delivery] emotional AI experience unlocked",
+      "$ curl http://127.0.0.1:9880/tts -> line-06.wav",
     ],
   },
 ];
@@ -231,6 +258,31 @@ async function synthesizeSceneAudio() {
     }
     writeFileSync(outputPath, data);
     outputPaths.push(outputPath);
+  }
+  return outputPaths;
+}
+
+function synthesizeUserPromptAudio() {
+  const userVoiceDir = path.join(audioDir, "personaforge-user-prompts");
+  mkdirSync(userVoiceDir, { recursive: true });
+
+  const voice = process.env.PERSONAFORGE_USER_VOICE ?? "en-US-AndrewNeural";
+  const rate = process.env.PERSONAFORGE_USER_VOICE_RATE ?? "+10%";
+  const outputPaths = [];
+  for (let index = 0; index < scenes.length; index += 1) {
+    const textPath = path.join(userVoiceDir, `prompt-${String(index + 1).padStart(2, "0")}.txt`);
+    const mediaPath = path.join(userVoiceDir, `prompt-${String(index + 1).padStart(2, "0")}.mp3`);
+    writeFileSync(textPath, `${scenes[index].userInput}\n`, "utf8");
+    runInherit(edgeTts, [
+      "--voice",
+      voice,
+      `--rate=${rate}`,
+      "--file",
+      textPath,
+      "--write-media",
+      mediaPath,
+    ]);
+    outputPaths.push(mediaPath);
   }
   return outputPaths;
 }
@@ -652,6 +704,9 @@ function productPreview() {
 function checkoutPreview() {
   return '<div class="store-head"><strong>Checkout</strong><span>payment method</span></div><h2 style="margin:8px 0 8px;color:#0f172a;font-size:28px;">Payment selected</h2><div class="pay"><div>PayPal</div><div class="active">AliPay</div></div><p style="color:#475569;font-size:15px;line-height:1.45;margin-top:18px;">The demo uses real paid callback evidence from the live store, then redacts customer and payment secrets before proof generation.</p>';
 }
+function searchPreview() {
+  return '<div class="store-head"><strong>Baidu Search</strong><span>vision browser context</span></div><div class="article"><h2>Nanami Chiaki</h2><p class="notice">Top result: Nanami Chiaki - Baidu Baike</p><p>PersonaForge opens a search page, captures the active browser window, reads visible result text, and routes the companion to a surprised expression.</p><p>Screen read: profile result, character name, and tiny personal details.</p></div>';
+}
 function baikePreview() {
   return '<div class="store-head"><strong>Baidu Baike</strong><span>active browser context</span></div><div class="article"><h2>Nanami Chiaki</h2><p class="notice">Vision match: this page describes the same character/persona pack.</p><p>Profile page text is visible to the local runtime. The companion detects that the page is about herself and switches expression route.</p><p>Runtime response: surprised -> shy.</p></div>';
 }
@@ -666,6 +721,7 @@ function readyPreview() {
 }
 function bodyFor(mode) {
   if (mode === 'checkout') return checkoutPreview();
+  if (mode === 'search') return searchPreview();
   if (mode === 'baike') return baikePreview();
   if (mode === 'runtime') return runtimePreview();
   if (mode === 'proof') return proofPreview();
@@ -674,6 +730,7 @@ function bodyFor(mode) {
 }
 function urlFor(mode) {
   if (mode === 'checkout') return 'https://ec.xingyipoxiao.cloud/zh/checkout/payment';
+  if (mode === 'search') return 'https://www.baidu.com/s?wd=Nanami+Chiaki';
   if (mode === 'baike') return 'https://baike.baidu.com/item/Nanami%20Chiaki';
   if (mode === 'runtime') return 'personaforge://runtime/qiance-companion-starter';
   if (mode === 'proof') return 'repo://artifacts/proof/proof_manifest.generated.json';
@@ -684,7 +741,7 @@ function statusFor(scene) {
   const rows = [
     ['mode', scene.mode],
     ['status', scene.status],
-    ['voice', 'GPT-SoVITS synthesized line'],
+    ['voice', 'Andrew prompt + GPT-SoVITS reply'],
     ['assets', 'local-only'],
   ];
   return rows.map(([k,v]) => '<div><span>' + k + '</span><strong>' + v + '</strong></div>').join('');
@@ -782,6 +839,7 @@ async function recordExperienceVideo() {
 
 async function buildExperienceAudio() {
   const sceneAudioPaths = await synthesizeSceneAudio();
+  const userAudioPaths = synthesizeUserPromptAudio();
   const bgmPath = path.join(audioDir, "hermes-personaforge-live-soft-bed.m4a");
   if (!existsSync(bgmPath)) {
     runInherit(ffmpeg, [
@@ -811,20 +869,32 @@ async function buildExperienceAudio() {
 
   const inputs = [];
   sceneAudioPaths.forEach((audioPath) => inputs.push("-i", audioPath));
+  userAudioPaths.forEach((audioPath) => inputs.push("-i", audioPath));
   inputs.push("-stream_loop", "-1", "-i", bgmPath);
 
-  const filters = scenes
+  const characterFilters = scenes
     .map((scene, index) => {
       const delay = Math.round(scene.voiceAt * 1000);
       return `[${index}:a]aresample=48000,aformat=sample_rates=48000:channel_layouts=stereo,adelay=${delay}:all=1,volume=2.15,apad,atrim=0:${durationSeconds}[v${index}]`;
     })
     .join(";");
-  const bgmIndex = scenes.length;
-  const mixInputs = scenes.map((_, index) => `[v${index}]`).join("") + "[bgm]";
+  const userOffset = scenes.length;
+  const userFilters = scenes
+    .map((scene, index) => {
+      const delay = Math.round((scene.userVoiceAt ?? scene.at + 0.35) * 1000);
+      return `[${userOffset + index}:a]aresample=48000,aformat=sample_rates=48000:channel_layouts=stereo,adelay=${delay}:all=1,volume=1.05,apad,atrim=0:${durationSeconds}[u${index}]`;
+    })
+    .join(";");
+  const bgmIndex = scenes.length * 2;
+  const mixInputs =
+    scenes.map((_, index) => `[v${index}]`).join("") +
+    scenes.map((_, index) => `[u${index}]`).join("") +
+    "[bgm]";
   const filter = [
-    filters,
+    characterFilters,
+    userFilters,
     `[${bgmIndex}:a]atrim=0:${durationSeconds},asetpts=PTS-STARTPTS,volume=0.055[bgm]`,
-    `${mixInputs}amix=inputs=${scenes.length + 1}:duration=longest:dropout_transition=2,alimiter=limit=0.95,aformat=sample_rates=48000:channel_layouts=stereo[aout]`,
+    `${mixInputs}amix=inputs=${scenes.length * 2 + 1}:duration=longest:dropout_transition=2,alimiter=limit=0.95,aformat=sample_rates=48000:channel_layouts=stereo[aout]`,
   ].join(";");
 
   runInherit(ffmpeg, [
