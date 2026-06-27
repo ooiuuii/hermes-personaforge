@@ -1,6 +1,6 @@
 # Hermes PersonaForge
 
-Hermes PersonaForge turns paid character/persona packs into audited voice-and-vision companion sessions.
+Hermes PersonaForge turns a purchased AI Companion Persona Pack into an audited voice-and-vision companion session.
 
 This is a fourth standalone Hermes Agent Accelerated Business Hackathon submission. It keeps a clear relationship to the earlier projects without sharing their repos:
 
@@ -14,7 +14,7 @@ This is a fourth standalone Hermes Agent Accelerated Business Hackathon submissi
 ## One-Line Claim
 
 ```text
-A paid persona-pack order becomes a Hermes-verified license, a voice-and-vision runtime session, and a proof pack that judges can regenerate.
+A customer buys an AI Companion Persona Pack, Hermes verifies payment, unlocks a Shinsekai-compatible manifest, launches the character runtime, and generates a proof pack judges can regenerate.
 ```
 
 ## Watch
@@ -32,16 +32,16 @@ artifacts/videos/hermes-personaforge-full-demo.en.andrew-nas-bgm.mp4
 
 ## Demo Story
 
-The emotional hook is simple: a buyer pays for a persona pack, then the character "wakes up" as a runtime experience.
+The emotional hook is simple: a buyer pays for a persona pack, downloads the manifest, imports it into a visual runtime, and the character reacts to its own product/order page.
 
 The business hook is what makes it a Hermes agent project:
 
-1. A paid order from the Qiance commerce rail becomes entitlement evidence.
-2. Hermes verifies the redacted payment snapshot.
-3. Hermes checks margin before spending delivery/runtime effort.
-4. Hermes issues a signed persona manifest.
-5. A Shinsekai-compatible local runtime can launch voice, vision, memory, and sprite switching.
-6. Hermes records a proof pack: payment, margin, license, runtime trace, safety policy, and audit ledger.
+1. A customer buys `AI Companion Persona Pack` on the Qiance EC site.
+2. Alipay callback proof marks the order paid, with sensitive data redacted.
+3. Hermes verifies payment and checks margin before spending delivery/runtime effort.
+4. Hermes unlocks `qiance-companion-starter.persona-manifest.json`.
+5. The buyer imports that manifest into a Shinsekai-compatible local runtime.
+6. The runtime sees the product/order page, reacts surprised, switches to a shy sprite/voice route, and Hermes records the proof pack.
 
 ## Important Asset Boundary
 
@@ -72,8 +72,8 @@ Generated proof files:
 | `artifacts/input/persona-commerce-order.json` | redacted paid persona-pack order input |
 | `artifacts/proof/payment_reconciliation.json` | payment evidence was accepted as entitlement source |
 | `artifacts/proof/persona_margin_gate.json` | revenue, cost, profit, and unlock decision |
-| `artifacts/proof/persona_license_manifest.json` | hashable persona license and manifest |
-| `artifacts/proof/runtime_launch_trace.json` | voice, vision, browser context, and sprite-route runtime trace |
+| `artifacts/proof/persona_license_manifest.json` | hashable license, gated download, import command, and manifest |
+| `artifacts/proof/runtime_launch_trace.json` | manifest import, voice, vision, EC page context, and sprite-route runtime trace |
 | `artifacts/proof/safety_redaction_report.json` | no local third-party character assets are redistributed |
 | `artifacts/proof/persona_audit_ledger.json` | end-to-end business trail |
 | `artifacts/proof/proof_manifest.generated.json` | hashes and verifier commands |
@@ -108,10 +108,11 @@ Generated video files are intentionally ignored from normal Git history and can 
 ## Architecture
 
 ```text
-paid store order
+customer buys AI Companion Persona Pack
   -> payment reconciliation
   -> Hermes margin gate
-  -> persona license manifest
+  -> persona manifest download
+  -> Shinsekai-compatible runtime import
   -> voice/vision runtime launch trace
   -> asset safety report
   -> audit ledger and proof manifest

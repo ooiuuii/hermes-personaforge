@@ -61,7 +61,10 @@ button {
 .browser-context-card,
 .terminal-card,
 .proof-artifact,
-.metric-card {
+.metric-card,
+.storefront-card,
+.order-page-card,
+.import-card {
   min-width: 0;
   border: 1px solid rgba(248, 244, 236, 0.13);
   border-radius: 8px;
@@ -413,6 +416,140 @@ button {
   grid-template-columns: 1.15fr 0.85fr;
 }
 
+.storefront-card {
+  overflow: hidden;
+  padding: 0;
+  border-color: rgba(92, 214, 182, 0.22);
+}
+
+.browser-bar {
+  min-height: 42px;
+  display: grid;
+  grid-template-columns: 10px 10px 10px 1fr;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 13px;
+  color: #d8d0c2;
+  border-bottom: 1px solid rgba(248, 244, 236, 0.12);
+  background: rgba(5, 8, 10, 0.56);
+}
+
+.browser-bar span {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #ef7e88;
+}
+
+.browser-bar span:nth-child(2) {
+  background: #f7c663;
+}
+
+.browser-bar span:nth-child(3) {
+  background: #5cd6b6;
+}
+
+.browser-bar strong {
+  min-width: 0;
+  color: #d8d0c2;
+  font-size: 12px;
+  font-family: "Cascadia Mono", "SFMono-Regular", Consolas, monospace;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.product-pane {
+  display: grid;
+  grid-template-columns: 190px minmax(0, 1fr);
+  gap: 16px;
+  padding: 16px;
+}
+
+.product-cover {
+  min-height: 214px;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  border: 1px solid rgba(248, 244, 236, 0.12);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.product-cover .persona-portrait {
+  transform: scale(0.67);
+}
+
+.product-copy {
+  display: grid;
+  align-content: center;
+  gap: 10px;
+}
+
+.product-copy span,
+.checkout-status,
+.runtime-import-line em,
+.order-page-body span {
+  color: #beb6aa;
+  font-size: 12px;
+  text-transform: uppercase;
+}
+
+.product-copy h3 {
+  margin: 0;
+  color: #fffaf0;
+  font-size: 32px;
+  line-height: 1.04;
+}
+
+.product-copy p,
+.import-card p,
+.order-page-body p {
+  color: #d8d0c2;
+  line-height: 1.42;
+}
+
+.checkout-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.checkout-row strong {
+  color: #f7c663;
+  font-size: 32px;
+}
+
+.checkout-row button {
+  min-height: 42px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 15px;
+  color: #111315;
+  font-weight: 850;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #f7c663, #5cd6b6);
+}
+
+.checkout-status {
+  min-height: 46px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 11px 16px;
+  color: #dff9ef;
+  border-top: 1px solid rgba(92, 214, 182, 0.2);
+  background: rgba(92, 214, 182, 0.08);
+}
+
+.order-card,
+.download-card,
+.import-card {
+  min-height: 0;
+}
+
 .gate-view {
   grid-template-columns: 0.82fr 1.18fr;
 }
@@ -476,6 +613,10 @@ button {
   display: block;
   margin-top: 7px;
   overflow-wrap: anywhere;
+}
+
+.order-card .field-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 .notice-line {
@@ -568,6 +709,26 @@ button {
   padding: 14px;
 }
 
+.import-card {
+  display: grid;
+  align-content: start;
+  gap: 13px;
+  border-color: rgba(154, 168, 255, 0.24);
+}
+
+.import-card code,
+.runtime-import-line code {
+  display: block;
+  padding: 11px 12px;
+  color: #e9fff6;
+  font-family: "Cascadia Mono", "SFMono-Regular", Consolas, monospace;
+  font-size: 13px;
+  border-left: 3px solid #9aa8ff;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.045);
+  overflow-wrap: anywhere;
+}
+
 .capability-panel div {
   min-height: 116px;
   display: grid;
@@ -586,9 +747,38 @@ button {
 
 .runtime-layout {
   display: grid;
-  grid-template-columns: 1.1fr 0.9fr;
+  grid-template-columns: 0.78fr 1.05fr 0.78fr;
   gap: 14px;
   align-items: stretch;
+}
+
+.order-page-card {
+  overflow: hidden;
+  border-color: rgba(247, 198, 99, 0.24);
+}
+
+.order-page-body {
+  display: grid;
+  gap: 12px;
+  padding: 14px;
+}
+
+.order-page-body div {
+  min-height: 96px;
+  display: grid;
+  align-content: center;
+  gap: 7px;
+  padding: 13px;
+  border: 1px solid rgba(248, 244, 236, 0.12);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.order-page-body strong {
+  color: #fffaf0;
+  font-size: 19px;
+  line-height: 1.16;
+  overflow-wrap: anywhere;
 }
 
 .runtime-window,
@@ -608,6 +798,14 @@ button {
   gap: 8px;
   padding: 12px 14px;
   border-bottom: 1px solid rgba(104, 200, 237, 0.18);
+}
+
+.runtime-import-line {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px 0;
 }
 
 .runtime-top span {
@@ -884,7 +1082,7 @@ button {
   flex: 1;
   display: flex;
   flex-direction: column;
-  justify-content: flex-end;
+  justify-content: flex-start;
   gap: 8px;
   padding: 14px;
   overflow: hidden;
@@ -1154,6 +1352,74 @@ button {
   box-shadow: 0 26px 90px rgba(0, 0, 0, 0.34);
 }
 
+.cinema-store-card {
+  width: 760px;
+  margin-top: 34px;
+  overflow: hidden;
+  border: 1px solid rgba(92, 214, 182, 0.34);
+  border-radius: 8px;
+  background: rgba(8, 13, 15, 0.92);
+  box-shadow: 0 26px 90px rgba(0, 0, 0, 0.34);
+}
+
+.cinema-store-body {
+  min-height: 128px;
+  display: grid;
+  grid-template-columns: 38px 1fr auto;
+  align-items: center;
+  gap: 15px;
+  padding: 20px 24px;
+}
+
+.cinema-store-body span,
+.cinema-store-body em,
+.cinema-download-card span {
+  color: #beb6aa;
+  font-size: 13px;
+  font-style: normal;
+  text-transform: uppercase;
+}
+
+.cinema-store-body strong {
+  display: block;
+  margin: 6px 0;
+  color: #fffaf0;
+  font-size: 28px;
+}
+
+.cinema-store-body button {
+  min-height: 46px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 16px;
+  color: #111315;
+  font-weight: 850;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #f7c663, #5cd6b6);
+}
+
+.cinema-download-card {
+  width: 760px;
+  min-height: 54px;
+  display: grid;
+  grid-template-columns: auto auto auto 1fr;
+  align-items: center;
+  gap: 11px;
+  margin-top: 12px;
+  padding: 0 18px;
+  border: 1px solid rgba(247, 198, 99, 0.24);
+  border-radius: 8px;
+  background: rgba(247, 198, 99, 0.08);
+}
+
+.cinema-download-card strong {
+  color: #fffaf0;
+  font-family: "Cascadia Mono", Consolas, monospace;
+  font-size: 14px;
+  overflow-wrap: anywhere;
+}
+
 .cinema-query-card span,
 .cinema-query-card em,
 .process-node em,
@@ -1176,7 +1442,7 @@ button {
 .cinema-process-chain {
   width: 720px;
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-columns: repeat(6, minmax(0, 1fr));
   gap: 10px;
   margin-top: 22px;
 }
@@ -1236,6 +1502,41 @@ button {
 .runtime-demo-frame {
   border: 1px solid rgba(248, 244, 236, 0.14);
   border-radius: 8px;
+}
+
+.runtime-cinema-stack {
+  display: grid;
+  gap: 14px;
+}
+
+.cinema-order-page-card {
+  overflow: hidden;
+  border: 1px solid rgba(247, 198, 99, 0.24);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.045);
+}
+
+.cinema-order-page-card > div:last-child {
+  display: grid;
+  gap: 7px;
+  padding: 16px 18px;
+}
+
+.cinema-order-page-card span {
+  color: #f7c663;
+  font-size: 12px;
+  font-weight: 850;
+  text-transform: uppercase;
+}
+
+.cinema-order-page-card strong {
+  color: #fffaf0;
+  font-size: 25px;
+}
+
+.cinema-order-page-card em {
+  color: #d8d0c2;
+  font-style: normal;
 }
 
 .compare-title {

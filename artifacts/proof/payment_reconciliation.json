@@ -5,11 +5,13 @@
   "order": {
     "id": "PF-2026-06-27-001",
     "sku": "persona-pack.qiance-companion.starter",
-    "product": "Qiance Companion Persona Pack",
+    "product": "AI Companion Persona Pack",
+    "product_url": "https://ec.xingyipoxiao.cloud/ai-companion-persona-pack",
+    "order_url": "https://ec.xingyipoxiao.cloud/orderdetails/PF-2026-06-27-001",
     "currency": "CNY",
-    "amount": 9.9,
+    "amount": 2,
     "payment_status": "paid",
-    "order_status": "ready_for_digital_delivery",
+    "order_status": "download_ready",
     "callback_paths": {
       "notify": "/Plugins/PaymentAliPay/Notify",
       "return": "/Plugins/PaymentAliPay/Return"
@@ -29,7 +31,7 @@
     {
       "name": "paid_order_snapshot_present",
       "result": true,
-      "evidence": "PF-2026-06-27-001 is paid"
+      "evidence": "PF-2026-06-27-001 is paid and download_ready"
     },
     {
       "name": "callback_paths_match_store_payment_provider",

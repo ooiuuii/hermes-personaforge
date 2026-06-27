@@ -27,14 +27,14 @@
     {
       "time": "00:12",
       "actor": "Persona runtime",
-      "command": "load manifest qiance-companion-starter",
+      "command": "import qiance-companion-starter.persona-manifest.json",
       "result": "voice, vision, memory, and sprite routing enabled"
     },
     {
       "time": "00:24",
       "actor": "Vision sidecar",
-      "command": "inspect browser page about the persona",
-      "result": "self-reference detected; emotion route=shy"
+      "command": "inspect EC product and order pages about the persona",
+      "result": "self-reference detected; emotion route=surprised -> shy"
     },
     {
       "time": "00:31",

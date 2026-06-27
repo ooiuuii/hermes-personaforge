@@ -7,17 +7,17 @@
   },
   "economics": {
     "currency": "CNY",
-    "revenue": 9.9,
+    "revenue": 2,
     "estimated_costs": {
-      "license_issuance": 0.18,
-      "storage_delivery": 0.12,
-      "tts_preview": 0.35,
-      "runtime_orchestration": 0.7,
-      "support_reserve": 0.45,
-      "total": 1.8
+      "license_issuance": 0.05,
+      "storage_delivery": 0.03,
+      "tts_preview": 0.08,
+      "runtime_orchestration": 0.18,
+      "support_reserve": 0.08,
+      "total": 0.42
     },
-    "gross_profit": 8.1,
-    "gross_margin": 0.82,
+    "gross_profit": 1.58,
+    "gross_margin": 0.79,
     "minimum_margin": 0.45
   },
   "decision": "unlock_persona_pack",

@@ -27,14 +27,14 @@ export const proofArtifacts: ProofArtifact[] = [
     label: "License manifest",
     file: "artifacts/proof/persona_license_manifest.json",
     status: "unlocked",
-    detail: "Hashable manifest records voice, vision, memory, emotion routes, and entitlement scope.",
+    detail: "Hashable manifest records the gated download, import command, voice, vision, memory, and emotion routes.",
     tone: "license",
   },
   {
     label: "Runtime trace",
     file: "artifacts/proof/runtime_launch_trace.json",
     status: "launched",
-    detail: "Deterministic trace shows browser context, voice synthesis, and sprite emotion routing.",
+    detail: "Deterministic trace shows manifest import, EC page context, voice synthesis, and sprite emotion routing.",
     tone: "runtime",
   },
   {

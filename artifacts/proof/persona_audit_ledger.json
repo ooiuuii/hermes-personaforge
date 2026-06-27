@@ -4,9 +4,9 @@
   "ledger": [
     {
       "time": "2026-06-27T15:58:00+08:00",
-      "actor": "Qiance store",
-      "action": "Paid digital product order captured",
-      "result": "PF-2026-06-27-001 9.90 CNY"
+      "actor": "Customer browser",
+      "action": "AI Companion Persona Pack purchased from EC site",
+      "result": "PF-2026-06-27-001 2.00 CNY"
     },
     {
       "time": "2026-06-27T16:00:00+08:00",
@@ -18,18 +18,18 @@
       "time": "2026-06-27T16:00:05+08:00",
       "actor": "Hermes margin gate",
       "action": "Checked paid order economics",
-      "result": "82% gross margin; unlock_persona_pack"
+      "result": "79% gross margin; unlock_persona_pack"
     },
     {
       "time": "2026-06-27T16:00:10+08:00",
       "actor": "Hermes license worker",
-      "action": "Issued persona pack license",
-      "result": "pf_394947b32138269bcb"
+      "action": "Unlocked persona manifest download",
+      "result": "pf_394947b32138269bcb -> qiance-companion-starter.persona-manifest.json"
     },
     {
       "time": "2026-06-27T16:00:15+08:00",
       "actor": "Persona runtime",
-      "action": "Started voice-and-vision session",
+      "action": "Imported manifest and started voice-and-vision session",
       "result": "A paid persona pack becomes a working voice-and-vision companion session, while Hermes records license and delivery proof."
     },
     {

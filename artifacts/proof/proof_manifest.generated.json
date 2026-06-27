@@ -6,19 +6,19 @@
   "generated_outputs": [
     {
       "path": "artifacts/proof/payment_reconciliation.json",
-      "sha256": "08cb22a92f0881b00581255fba08f0042d62277f7db7b3494e8cf6034f29483d"
+      "sha256": "9cebd6b323d6fc8cb0d775ef54b0bcec886b99b598a73e5a545e1010dae0900e"
     },
     {
       "path": "artifacts/proof/persona_margin_gate.json",
-      "sha256": "6950e00ee46edacef263ff4ce338ca0e7a5d2816f83a0c1abcf113d4dc57eb15"
+      "sha256": "ad1728d225fd6110cc7b79ad1bfe4d470f9d77ed581556083d8d9506ec03f301"
     },
     {
       "path": "artifacts/proof/persona_license_manifest.json",
-      "sha256": "e64f1b24be937ab90e370ec8eab8d06cea92cb002346fbed6caa0a528069d783"
+      "sha256": "9d3b0df929d203acf3b9d39ae204141a701e771e892783ed6da521e435d66a37"
     },
     {
       "path": "artifacts/proof/runtime_launch_trace.json",
-      "sha256": "bc5b27324462dcb1309feabcf87d9a892efdff8fd57e8a30c94a6a503a340bf3"
+      "sha256": "831298d65a6495a6cf5c7dd3229ad526877d445204a67d148155d0349e9bb08c"
     },
     {
       "path": "artifacts/proof/safety_redaction_report.json",
@@ -26,13 +26,13 @@
     },
     {
       "path": "artifacts/proof/persona_audit_ledger.json",
-      "sha256": "ca4bcc4a533b3da4d5774ce19f3a54977a4afdb8dc44402fcb2c6d0507f8bae8"
+      "sha256": "259bd1de0f9ec7a9a3ec54f216488abd255169d595eb2ed7ffad17b11e6063d9"
     }
   ],
   "static_evidence": [
     {
       "path": "artifacts/input/persona-commerce-order.json",
-      "sha256": "5960c56ea47f3ff6f22d8bc572f9b0b0b8eadaf45a0f123f52457798262bd756"
+      "sha256": "c163c32d84b3c69c2ac93a67e38b243ed2b9ccf121db2f827e0e132a31479374"
     }
   ],
   "verifier_claims": [

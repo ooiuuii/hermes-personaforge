@@ -39,18 +39,22 @@ export const personaOrder = {
   merchant: "Deqing Qiance Technology Co., Ltd.",
   project: "Hermes PersonaForge",
   sku: "persona-pack.qiance-companion.starter",
-  product: "Qiance Companion Persona Pack",
+  product: "AI Companion Persona Pack",
+  productUrl: "https://ec.xingyipoxiao.cloud/ai-companion-persona-pack",
+  orderUrl: "https://ec.xingyipoxiao.cloud/orderdetails/PF-2026-06-27-001",
   paymentProvider: "Alipay",
-  amount: "CNY 9.90",
-  revenue: 9.9,
-  estimatedCost: 1.8,
-  grossProfit: 8.1,
-  margin: "81.8%",
+  amount: "CNY 2.00",
+  revenue: 2,
+  estimatedCost: 0.42,
+  grossProfit: 1.58,
+  margin: "79.0%",
   minimumMargin: "45%",
   paidStatus: "paid",
-  orderStatus: "ready for digital delivery",
+  orderStatus: "download ready",
   licenseId: "pf_84f2d6e64e8b19a107",
   packId: "qiance-companion-starter",
+  downloadFile: "qiance-companion-starter.persona-manifest.json",
+  importCommand: "personaforge import qiance-companion-starter.persona-manifest.json",
   runtime: "Shinsekai-compatible voice + vision session",
   tradeRef: "20260627-PERSONA-****-PAID",
 };
@@ -58,11 +62,11 @@ export const personaOrder = {
 export const stages: Stage[] = [
   {
     id: "payment",
-    label: "Paid Pack",
+    label: "Buy Pack",
     eyebrow: "live commerce rail",
-    headline: "A paid store order becomes a persona-pack entitlement.",
+    headline: "A customer buys an AI Companion Persona Pack from the EC site.",
     detail:
-      "The demo starts from the Qiance EC payment rail and uses redacted proof instead of payment secrets or raw customer data.",
+      "The demo starts at the Qiance EC product page, follows Alipay paid proof, then exposes a gated download.",
   },
   {
     id: "gate",
@@ -74,19 +78,19 @@ export const stages: Stage[] = [
   },
   {
     id: "license",
-    label: "License",
+    label: "Download",
     eyebrow: "entitlement worker",
-    headline: "A paid buyer receives a signed persona manifest.",
+    headline: "Hermes unlocks a signed persona manifest for download.",
     detail:
-      "The manifest describes voice, vision, memory, and emotion routing without committing third-party character assets.",
+      "The buyer downloads a Shinsekai-compatible manifest that points to local voice, vision, memory, and emotion routes.",
   },
   {
     id: "runtime",
     label: "Runtime",
     eyebrow: "voice + vision companion",
-    headline: "The character session reacts to browser context and switches emotion.",
+    headline: "The downloaded pack launches a Shinsekai-compatible runtime.",
     detail:
-      "The private runtime can read a page, notice self-reference, answer with voice, and switch to a shy sprite route.",
+      "The character sees its own product and order page, becomes surprised, then switches to a shy voice and sprite route.",
   },
   {
     id: "safety",
@@ -108,20 +112,20 @@ export const stages: Stage[] = [
 
 export const metricCards: MetricCard[] = [
   {
-    label: "Paid persona pack",
+    label: "Customer checkout",
     value: personaOrder.amount,
-    detail: "Digital product order is treated as a paid entitlement source.",
+    detail: "A real commerce order becomes the paid entitlement source.",
     tone: "payment",
   },
   {
     label: "Estimated delivery cost",
-    value: "CNY 1.80",
+    value: "CNY 0.42",
     detail: "License issuance, storage, TTS preview, runtime orchestration, support reserve.",
     tone: "runtime",
   },
   {
     label: "Gross profit",
-    value: "CNY 8.10",
+    value: "CNY 1.58",
     detail: `${personaOrder.margin} margin clears the ${personaOrder.minimumMargin} policy.`,
     tone: "profit",
   },
@@ -145,9 +149,9 @@ export const agentEvents: AgentEvent[] = [
   {
     id: "order",
     time: "00:04",
-    actor: "Qiance store",
-    command: "read paid order --sku persona-pack.qiance-companion.starter",
-    result: "CNY 9.90 paid; customer and full trade reference redacted",
+    actor: "Customer browser",
+    command: "buy ai-companion-persona-pack --site ec.xingyipoxiao.cloud",
+    result: "checkout completed through Alipay; customer and full trade reference redacted",
     tone: "payment",
   },
   {
@@ -155,15 +159,15 @@ export const agentEvents: AgentEvent[] = [
     time: "00:08",
     actor: "Payment verifier",
     command: "reconcile alipay callbacks --redacted",
-    result: "entitlement source accepted",
+    result: "paid order accepted as persona-pack entitlement source",
     tone: "payment",
   },
   {
     id: "gate",
     time: "00:13",
     actor: "Hermes profit gate",
-    command: "evaluate revenue=9.90 cost=1.80 min_margin=0.45",
-    result: "unlock accepted; gross profit CNY 8.10",
+    command: "evaluate revenue=2.00 cost=0.42 min_margin=0.45",
+    result: "unlock accepted; gross profit CNY 1.58",
     tone: "profit",
   },
   {
@@ -171,14 +175,14 @@ export const agentEvents: AgentEvent[] = [
     time: "00:19",
     actor: "License worker",
     command: "issue persona manifest --pack qiance-companion-starter",
-    result: "license pf_84f2d6e64e8b19a107 unlocked",
+    result: "download qiance-companion-starter.persona-manifest.json unlocked",
     tone: "license",
   },
   {
     id: "runtime",
     time: "00:25",
     actor: "Persona runtime",
-    command: "launch voice+vision companion --manifest signed",
+    command: "import manifest && launch shinsekai-compatible runtime",
     result: "browser context, voice, memory, and sprite routes online",
     tone: "runtime",
   },
@@ -186,8 +190,8 @@ export const agentEvents: AgentEvent[] = [
     id: "vision",
     time: "00:32",
     actor: "Vision sidecar",
-    command: "inspect browser page --detect self reference",
-    result: "emotion route=shy; runtime switches expression",
+    command: "inspect product and order pages --detect self reference",
+    result: "emotion route=surprised -> shy; runtime switches expression and queues voice",
     tone: "runtime",
   },
   {
@@ -212,9 +216,9 @@ export const ledgerByStep: LedgerEntry[][] = [
   [
     {
       time: "00:04",
-      actor: "Qiance store",
-      action: "Captured paid persona-pack order",
-      result: `${personaOrder.product} is paid on ${personaOrder.store}.`,
+      actor: "Customer browser",
+      action: "Bought persona pack on the EC site",
+      result: `${personaOrder.product} is paid on ${personaOrder.store} and gated behind Hermes verification.`,
       tone: "payment",
     },
   ],
@@ -223,7 +227,7 @@ export const ledgerByStep: LedgerEntry[][] = [
       time: "00:13",
       actor: "Hermes margin gate",
       action: "Accepted profitable digital delivery",
-      result: "CNY 9.90 revenue minus CNY 1.80 estimated cost produces CNY 8.10 gross profit.",
+      result: "CNY 2.00 revenue minus CNY 0.42 estimated cost produces CNY 1.58 gross profit.",
       tone: "profit",
     },
   ],
@@ -231,8 +235,8 @@ export const ledgerByStep: LedgerEntry[][] = [
     {
       time: "00:19",
       actor: "License worker",
-      action: "Issued persona manifest",
-      result: "Voice, vision, memory, and emotion routes are included in a hashable manifest.",
+      action: "Unlocked persona manifest download",
+      result: "The buyer receives qiance-companion-starter.persona-manifest.json after paid proof clears.",
       tone: "license",
     },
   ],
@@ -240,8 +244,8 @@ export const ledgerByStep: LedgerEntry[][] = [
     {
       time: "00:32",
       actor: "Runtime sidecars",
-      action: "Started companion session",
-      result: "The runtime can read page context, speak, and switch to a shy sprite route.",
+      action: "Imported manifest and started companion session",
+      result: "The runtime reads the product/order page, reacts surprised, then switches to a shy voice and sprite route.",
       tone: "runtime",
     },
   ],
@@ -266,7 +270,7 @@ export const ledgerByStep: LedgerEntry[][] = [
 ];
 
 export const defaultTaskPrompt =
-  "When a customer buys a persona pack, verify paid evidence, check margin, issue a license manifest, start a voice-and-vision companion runtime, and seal an audit proof pack.";
+  "When a customer buys an AI Companion Persona Pack, verify payment, check margin, unlock the manifest download, import it into a Shinsekai-compatible runtime, react to the product/order page, and seal an audit proof pack.";
 
 export const goalText =
   "Hermes PersonaForge is the emotional-value sequel to Commerce Ops: real payment unlocks a licensed persona-pack experience, while Hermes keeps the business logic auditable.";

@@ -3,12 +3,14 @@ import {
   Bot,
   CircleDollarSign,
   CreditCard,
+  Download,
   Eye,
   FileText,
   KeyRound,
   Mic2,
   PackageCheck,
   ShieldCheck,
+  ShoppingCart,
   Sparkles,
   Store,
   TerminalSquare,
@@ -18,20 +20,22 @@ import type { CSSProperties } from "react";
 import { PersonaPortrait } from "./PersonaPortrait";
 
 const introEvents = [
-  "$ store read paid persona-pack order",
+  "$ customer buys AI Companion Persona Pack",
+  "$ alipay callback marks order paid",
   "$ hermes verify-payment --redacted",
-  "$ hermes margin-gate --revenue 9.90 --cost 1.80",
-  "$ hermes issue-license --pack qiance-companion-starter",
-  "$ runtime launch --voice --vision --sprite-router",
+  "$ hermes unlock download qiance-companion-starter.persona-manifest.json",
+  "$ runtime import manifest --shinsekai-compatible",
+  "$ character sees its own product page and reacts shyly",
   "$ npm test",
   "PERSONAFORGE_PROOF_VERIFY_OK",
 ];
 
 const flowItems = [
-  ["Paid order", "Qiance store"],
-  ["Profit gate", "81.8% margin"],
-  ["License", "manifest unlocked"],
-  ["Runtime", "voice + vision"],
+  ["Buy", "EC product page"],
+  ["Verify", "Alipay paid proof"],
+  ["Download", "manifest unlocked"],
+  ["Import", "runtime starts"],
+  ["React", "surprised -> shy"],
   ["Proof", "ledger sealed"],
 ];
 
@@ -46,11 +50,13 @@ function IntroScene() {
       <section className="cinema-copy">
         <p>FOURTH STANDALONE SUBMISSION</p>
         <h1>
-          Buy a persona pack.
+          Customer buys
           <br />
-          Hermes unlocks it.
+          a persona pack.
           <br />
-          The character wakes up.
+          The character
+          <br />
+          wakes up.
         </h1>
       </section>
 
@@ -63,10 +69,32 @@ function IntroScene() {
           </div>
         </div>
 
-        <div className="cinema-query-card">
-          <span>Product</span>
-          <strong>Qiance Companion Persona Pack</strong>
-          <em>Paid through the commerce rail, unlocked through Hermes, delivered as a runtime session.</em>
+        <div className="cinema-store-card">
+          <div className="browser-bar">
+            <span />
+            <span />
+            <span />
+            <strong>https://ec.xingyipoxiao.cloud/ai-companion-persona-pack</strong>
+          </div>
+          <div className="cinema-store-body">
+            <Store size={26} />
+            <div>
+              <span>Qiance EC store</span>
+              <strong>AI Companion Persona Pack</strong>
+              <em>Voice, vision, memory, and emotion routes</em>
+            </div>
+            <button>
+              <ShoppingCart size={16} />
+              Buy CNY 2.00
+            </button>
+          </div>
+        </div>
+
+        <div className="cinema-download-card">
+          <CreditCard size={18} />
+          <span>Alipay paid</span>
+          <Download size={18} />
+          <strong>qiance-companion-starter.persona-manifest.json</strong>
         </div>
 
         <div className="cinema-process-chain">
@@ -132,19 +160,39 @@ function RuntimeScene() {
           </div>
         </div>
 
-        <div className="runtime-demo-frame">
-          <div className="runtime-top">
-            <span />
-            <span />
-            <span />
-            <strong>Persona runtime</strong>
+        <div className="runtime-cinema-stack">
+          <div className="runtime-demo-frame">
+            <div className="runtime-top">
+              <span />
+              <span />
+              <span />
+              <strong>Persona runtime</strong>
+            </div>
+            <div className="runtime-import-line">
+              <code>personaforge import qiance-companion-starter.persona-manifest.json</code>
+              <em>verified</em>
+            </div>
+            <div className="runtime-body">
+              <PersonaPortrait emotion="shy" />
+              <div className="speech-panel">
+                <span>EC order page detected</span>
+                <strong>"Wait... they bought my persona pack? That's embarrassing."</strong>
+                <p>emotion route: surprised to shy / sprite switch / voice response</p>
+              </div>
+            </div>
           </div>
-          <div className="runtime-body">
-            <PersonaPortrait emotion="shy" />
-            <div className="speech-panel">
-              <span>vision sidecar</span>
-              <strong>"It's about me? I'm shy."</strong>
-              <p>emotion route: shy / sprite switch / voice response</p>
+
+          <div className="cinema-order-page-card">
+            <div className="browser-bar">
+              <span />
+              <span />
+              <span />
+              <strong>https://ec.xingyipoxiao.cloud/orderdetails/PF-2026-06-27-001</strong>
+            </div>
+            <div>
+              <span>AI Companion Persona Pack</span>
+              <strong>Paid / Download delivered</strong>
+              <em>Vision sidecar sees the buyer's product and order context.</em>
             </div>
           </div>
         </div>

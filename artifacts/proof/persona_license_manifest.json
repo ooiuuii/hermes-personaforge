@@ -37,7 +37,10 @@
   "manifest_sha256": "abc9dbb9d5d83ce9e51ae65833fd24aa4a7dc47ddf5d84d3c92310dce21ffa3a",
   "delivery": {
     "downloadable_manifest": true,
+    "download_file": "qiance-companion-starter.persona-manifest.json",
+    "download_unlocked_after": "payment_reconciliation + margin_gate",
     "local_runtime_start_command": "npm run dev; connect private Shinsekai-compatible runtime",
+    "local_runtime_import_command": "personaforge import qiance-companion-starter.persona-manifest.json",
     "external_asset_download": "not included in public repo"
   }
 }

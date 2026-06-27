@@ -22,21 +22,21 @@ const finalPath = path.join(outputDir, finalName);
 
 const englishCaptions = {
   intro:
-    "Hermes PersonaForge is the fourth standalone submission: paid persona packs become audited companion sessions.",
+    "Hermes PersonaForge is the fourth standalone submission: a customer buys an AI Companion Persona Pack from our EC site.",
   introFlow:
-    "A buyer pays on the commerce rail, Hermes verifies the order, checks margin, unlocks a license, starts the runtime, and seals proof.",
+    "Hermes verifies Alipay paid proof, unlocks a persona manifest download, imports it into runtime, and seals proof.",
   runtime:
-    "The product is emotional value: a voice-and-vision character session that can react to browser context and switch expression.",
+    "After download, the manifest starts a Shinsekai-compatible voice-and-vision runtime.",
   runtimeProof:
-    "The public repo does not ship local character packs. It ships the business, license, runtime trace, and asset-boundary proof.",
+    "The character sees its own product and order page, reacts surprised, then switches to a shy voice and sprite route.",
   appPayment:
-    "In the workbench, a paid persona-pack order from the Qiance store becomes the entitlement source.",
+    "In the workbench, the customer checkout, Alipay paid proof, and gated manifest download are visible in one flow.",
   appGate:
     "Hermes asks the business question before delivery: revenue, delivery cost, support reserve, gross profit, and margin.",
   appLicense:
-    "After the margin gate, Hermes issues a hashable persona manifest with voice, vision, memory, and emotion routes.",
+    "After the margin gate, Hermes unlocks a downloadable persona manifest with voice, vision, memory, and emotion routes.",
   appRuntime:
-    "The runtime demo mirrors the Shinsekai-style moment: the character sees a page about itself and reacts shyly.",
+    "The runtime imports the manifest, reads the buyer's product and order page, and reacts with a surprised-to-shy response.",
   appSafety:
     "The safety sidecar keeps local character assets and voice checkpoints out of Git, while preserving proof for judges.",
   appProof:
@@ -187,7 +187,7 @@ const app = await recordSegment({
     await openStage(page, "Profit Gate");
     await setCaption(page, caption("appGate"));
     await pause(page, 5200);
-    await openStage(page, "License");
+    await openStage(page, "Download");
     await setCaption(page, caption("appLicense"));
     await pause(page, 5200);
     await openStage(page, "Runtime");

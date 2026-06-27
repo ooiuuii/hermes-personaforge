@@ -30,10 +30,11 @@ It must not show:
 
 ```text
 Store product:
-  Qiance Companion Persona Pack
+  AI Companion Persona Pack
 
 Hermes output:
-  persona license manifest
+  gated persona manifest download
+  Shinsekai-compatible runtime import command
   runtime launch trace
   safety report
   proof ledger

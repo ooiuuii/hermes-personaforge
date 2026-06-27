@@ -4,6 +4,7 @@ import {
   Check,
   CircleDollarSign,
   CreditCard,
+  Download,
   Eye,
   FileText,
   KeyRound,
@@ -13,6 +14,7 @@ import {
   Play,
   RefreshCcw,
   ShieldCheck,
+  ShoppingCart,
   Sparkles,
   Store,
   TerminalSquare,
@@ -91,11 +93,41 @@ function PaymentView() {
 
   return (
     <section className="view-grid payment-view">
-      <article className="proof-card hero-card">
+      <article className="storefront-card proof-card">
+        <div className="browser-bar">
+          <span />
+          <span />
+          <span />
+          <strong>{personaOrder.productUrl}</strong>
+        </div>
+        <div className="product-pane">
+          <div className="product-cover">
+            <PersonaPortrait emotion="curious" />
+          </div>
+          <div className="product-copy">
+            <span>Digital product</span>
+            <h3>{personaOrder.product}</h3>
+            <p>Voice, vision, memory, and emotion routes delivered as a Shinsekai-compatible persona manifest.</p>
+            <div className="checkout-row">
+              <strong>{personaOrder.amount}</strong>
+              <button>
+                <ShoppingCart size={16} />
+                Buy pack
+              </button>
+            </div>
+          </div>
+        </div>
+        <div className="checkout-status">
+          <BadgeCheck size={17} />
+          Alipay paid proof received. Hermes can now verify entitlement before unlocking download.
+        </div>
+      </article>
+
+      <article className="proof-card hero-card order-card">
         <div className="card-title">
           <CreditCard size={24} />
           <div>
-            <span>Paid persona pack</span>
+            <span>Paid order</span>
             <strong>{personaOrder.amount}</strong>
           </div>
           <BadgeCheck size={22} />
@@ -114,6 +146,16 @@ function PaymentView() {
         </div>
       </article>
 
+      <article className="download-card story-card">
+        <Download size={28} />
+        <span>After Hermes verification</span>
+        <h3>{personaOrder.downloadFile}</h3>
+        <p>
+          The customer only sees the download after paid callback reconciliation and margin approval. Failed
+          delivery can be held or refunded instead of silently breaking.
+        </p>
+      </article>
+
       <article className="story-card">
         <Store size={28} />
         <span>Why this is project four</span>
@@ -129,10 +171,10 @@ function PaymentView() {
 
 function GateView() {
   const rows = [
-    ["Revenue", "CNY 9.90", "paid digital product"],
-    ["Delivery cost", "CNY 1.80", "license, storage, TTS preview, runtime, support"],
-    ["Gross profit", "CNY 8.10", "revenue minus estimated cost"],
-    ["Decision", "UNLOCK", "81.8% margin clears 45% policy"],
+    ["Revenue", personaOrder.amount, "paid digital product"],
+    ["Delivery cost", "CNY 0.42", "license, storage, TTS preview, runtime, support"],
+    ["Gross profit", "CNY 1.58", "revenue minus estimated cost"],
+    ["Decision", "UNLOCK", `${personaOrder.margin} margin clears ${personaOrder.minimumMargin} policy`],
   ];
 
   return (
@@ -173,8 +215,8 @@ function LicenseView() {
     ["pack_id", personaOrder.packId],
     ["license", personaOrder.licenseId],
     ["format", "shinsekai-compatible-manifest"],
+    ["download", personaOrder.downloadFile],
     ["usage", "personal demo runtime"],
-    ["memory", "session local, audit redacted"],
     ["expires", "2026-07-27"],
   ];
 
@@ -185,7 +227,7 @@ function LicenseView() {
           <KeyRound size={24} />
           <div>
             <span>Persona license manifest</span>
-            <strong>Unlocked after paid proof</strong>
+            <strong>Download unlocked after paid proof</strong>
           </div>
         </div>
         <div className="manifest-grid">
@@ -196,6 +238,20 @@ function LicenseView() {
             </div>
           ))}
         </div>
+      </article>
+      <article className="import-card proof-card">
+        <div className="card-title">
+          <Download size={24} />
+          <div>
+            <span>Customer download</span>
+            <strong>{personaOrder.downloadFile}</strong>
+          </div>
+        </div>
+        <code>{personaOrder.importCommand}</code>
+        <p>
+          This is the handoff between the real EC website and the local visual runtime: payment unlocks a
+          manifest, not a public dump of private character assets.
+        </p>
       </article>
       <article className="capability-panel">
         <div>
@@ -226,19 +282,49 @@ function LicenseView() {
 function RuntimeView() {
   return (
     <section className="runtime-layout">
+      <article className="order-page-card">
+        <div className="browser-bar">
+          <span />
+          <span />
+          <span />
+          <strong>{personaOrder.orderUrl}</strong>
+        </div>
+        <div className="order-page-body">
+          <div>
+            <span>Order status</span>
+            <strong>Paid and delivered</strong>
+            <p>{personaOrder.product}</p>
+          </div>
+          <div>
+            <span>Download</span>
+            <strong>{personaOrder.downloadFile}</strong>
+            <p>Hermes license {personaOrder.licenseId}</p>
+          </div>
+          <div>
+            <span>Runtime prompt</span>
+            <strong>Open this page and tell me what you see.</strong>
+            <p>Vision sidecar reads the buyer's product and order context.</p>
+          </div>
+        </div>
+      </article>
+
       <article className="runtime-window">
         <div className="runtime-top">
           <span />
           <span />
           <span />
-          <strong>PersonaForge Runtime</strong>
+          <strong>Shinsekai-compatible runtime</strong>
+        </div>
+        <div className="runtime-import-line">
+          <code>{personaOrder.importCommand}</code>
+          <em>manifest verified</em>
         </div>
         <div className="runtime-body">
           <PersonaPortrait emotion="shy" />
           <div className="speech-panel">
-            <span>browser context detected</span>
-            <strong>"It's about me? I'm shy."</strong>
-            <p>emotion route: shy / sprite switch / voice response queued</p>
+            <span>product page detected</span>
+            <strong>"Wait... they bought my persona pack? That's embarrassing."</strong>
+            <p>emotion route: surprised to shy / sprite switch / voice response queued</p>
           </div>
         </div>
       </article>
@@ -251,9 +337,9 @@ function RuntimeView() {
           </div>
         </div>
         <p>
-          The video can mirror the Shinsekai-style flow: open a page about the character, let the runtime read
-          it, then switch expression and speak. Hermes adds the paid entitlement and proof layer around that
-          emotional moment.
+          The video mirrors the Shinsekai-style flow, but grounds it in a paid digital product: open the buyer's
+          product or order page, let the runtime inspect it, then switch expression and speak after entitlement is
+          verified.
         </p>
         <div className="runtime-tags">
           <span>voice</span>

@@ -40,11 +40,13 @@ const fixture = {
   order: {
     id: "PF-2026-06-27-001",
     sku: "persona-pack.qiance-companion.starter",
-    product: "Qiance Companion Persona Pack",
+    product: "AI Companion Persona Pack",
+    product_url: "https://ec.xingyipoxiao.cloud/ai-companion-persona-pack",
+    order_url: "https://ec.xingyipoxiao.cloud/orderdetails/PF-2026-06-27-001",
     currency: "CNY",
-    amount: 9.9,
+    amount: 2.0,
     payment_status: "paid",
-    order_status: "ready_for_digital_delivery",
+    order_status: "download_ready",
     callback_paths: {
       notify: "/Plugins/PaymentAliPay/Notify",
       return: "/Plugins/PaymentAliPay/Return"
@@ -54,12 +56,12 @@ const fixture = {
       "4eabf2b287891b562f2044eb4adad6c7ef6518d5aa9b1057fd307cfcad88d409"
   },
   economics: {
-    revenue: 9.9,
-    license_issuance_cost: 0.18,
-    storage_delivery_cost: 0.12,
-    tts_preview_cost: 0.35,
-    runtime_orchestration_cost: 0.7,
-    support_reserve: 0.45,
+    revenue: 2.0,
+    license_issuance_cost: 0.05,
+    storage_delivery_cost: 0.03,
+    tts_preview_cost: 0.08,
+    runtime_orchestration_cost: 0.18,
+    support_reserve: 0.08,
     minimum_margin: 0.45
   },
   persona_pack: {
@@ -69,10 +71,11 @@ const fixture = {
     public_assets: ["manifest", "persona prompts", "emotion routing table", "license metadata"],
     local_runtime_capabilities: ["voice", "vision", "sprite_switching", "short_term_memory"],
     demo_scenes: [
-      "customer buys a persona pack",
+      "customer buys an AI Companion Persona Pack from the EC website",
       "Hermes verifies paid entitlement",
-      "Hermes unlocks a signed persona manifest",
-      "runtime reads a browser page and reacts with a shy sprite",
+      "Hermes unlocks a signed persona manifest download",
+      "customer imports the manifest into a Shinsekai-compatible runtime",
+      "runtime reads the product/order page and reacts with a surprised-to-shy sprite",
       "audit pack records payment, license, runtime, and asset policy"
     ],
     asset_policy: {
@@ -93,7 +96,7 @@ const fixture = {
 function buildPaymentReconciliation(input) {
   const paid =
     input.order.payment_status === "paid" &&
-    input.order.order_status === "ready_for_digital_delivery" &&
+    input.order.order_status === "download_ready" &&
     input.commerce_source.status === "paid";
 
   return {
@@ -106,7 +109,7 @@ function buildPaymentReconciliation(input) {
       {
         name: "paid_order_snapshot_present",
         result: paid,
-        evidence: `${input.order.id} is ${input.order.payment_status}`
+        evidence: `${input.order.id} is ${input.order.payment_status} and ${input.order.order_status}`
       },
       {
         name: "callback_paths_match_store_payment_provider",
@@ -209,7 +212,10 @@ function buildLicenseManifest(input, gate) {
     manifest_sha256: hashText(JSON.stringify(personaManifest)),
     delivery: {
       downloadable_manifest: true,
+      download_file: "qiance-companion-starter.persona-manifest.json",
+      download_unlocked_after: "payment_reconciliation + margin_gate",
       local_runtime_start_command: "npm run dev; connect private Shinsekai-compatible runtime",
+      local_runtime_import_command: "personaforge import qiance-companion-starter.persona-manifest.json",
       external_asset_download: "not included in public repo"
     }
   };
@@ -245,14 +251,14 @@ function buildRuntimeTrace(input, license) {
       {
         time: "00:12",
         actor: "Persona runtime",
-        command: "load manifest qiance-companion-starter",
+        command: "import qiance-companion-starter.persona-manifest.json",
         result: "voice, vision, memory, and sprite routing enabled"
       },
       {
         time: "00:24",
         actor: "Vision sidecar",
-        command: "inspect browser page about the persona",
-        result: "self-reference detected; emotion route=shy"
+        command: "inspect EC product and order pages about the persona",
+        result: "self-reference detected; emotion route=surprised -> shy"
       },
       {
         time: "00:31",
@@ -305,8 +311,8 @@ function buildAuditLedger(input, reconciliation, gate, license, runtimeTrace, sa
     ledger: [
       {
         time: "2026-06-27T15:58:00+08:00",
-        actor: "Qiance store",
-        action: "Paid digital product order captured",
+        actor: "Customer browser",
+        action: "AI Companion Persona Pack purchased from EC site",
         result: `${input.order.id} ${input.order.amount.toFixed(2)} ${input.order.currency}`
       },
       {
@@ -324,13 +330,13 @@ function buildAuditLedger(input, reconciliation, gate, license, runtimeTrace, sa
       {
         time: "2026-06-27T16:00:10+08:00",
         actor: "Hermes license worker",
-        action: "Issued persona pack license",
-        result: license.license_id
+        action: "Unlocked persona manifest download",
+        result: `${license.license_id} -> ${license.delivery.download_file}`
       },
       {
         time: "2026-06-27T16:00:15+08:00",
         actor: "Persona runtime",
-        action: "Started voice-and-vision session",
+        action: "Imported manifest and started voice-and-vision session",
         result: runtimeTrace.user_visible_result
       },
       {

@@ -19,11 +19,13 @@
   "order": {
     "id": "PF-2026-06-27-001",
     "sku": "persona-pack.qiance-companion.starter",
-    "product": "Qiance Companion Persona Pack",
+    "product": "AI Companion Persona Pack",
+    "product_url": "https://ec.xingyipoxiao.cloud/ai-companion-persona-pack",
+    "order_url": "https://ec.xingyipoxiao.cloud/orderdetails/PF-2026-06-27-001",
     "currency": "CNY",
-    "amount": 9.9,
+    "amount": 2,
     "payment_status": "paid",
-    "order_status": "ready_for_digital_delivery",
+    "order_status": "download_ready",
     "callback_paths": {
       "notify": "/Plugins/PaymentAliPay/Notify",
       "return": "/Plugins/PaymentAliPay/Return"
@@ -32,12 +34,12 @@
     "trade_ref_sha256": "4eabf2b287891b562f2044eb4adad6c7ef6518d5aa9b1057fd307cfcad88d409"
   },
   "economics": {
-    "revenue": 9.9,
-    "license_issuance_cost": 0.18,
-    "storage_delivery_cost": 0.12,
-    "tts_preview_cost": 0.35,
-    "runtime_orchestration_cost": 0.7,
-    "support_reserve": 0.45,
+    "revenue": 2,
+    "license_issuance_cost": 0.05,
+    "storage_delivery_cost": 0.03,
+    "tts_preview_cost": 0.08,
+    "runtime_orchestration_cost": 0.18,
+    "support_reserve": 0.08,
     "minimum_margin": 0.45
   },
   "persona_pack": {
@@ -57,10 +59,11 @@
       "short_term_memory"
     ],
     "demo_scenes": [
-      "customer buys a persona pack",
+      "customer buys an AI Companion Persona Pack from the EC website",
       "Hermes verifies paid entitlement",
-      "Hermes unlocks a signed persona manifest",
-      "runtime reads a browser page and reacts with a shy sprite",
+      "Hermes unlocks a signed persona manifest download",
+      "customer imports the manifest into a Shinsekai-compatible runtime",
+      "runtime reads the product/order page and reacts with a surprised-to-shy sprite",
       "audit pack records payment, license, runtime, and asset policy"
     ],
     "asset_policy": {
