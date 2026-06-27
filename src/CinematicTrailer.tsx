@@ -143,7 +143,7 @@ function RuntimeScene() {
             <PersonaPortrait emotion="shy" />
             <div className="speech-panel">
               <span>vision sidecar</span>
-              <strong>"This page is about me? I'm a little embarrassed."</strong>
+              <strong>"It's about me? I'm shy."</strong>
               <p>emotion route: shy / sprite switch / voice response</p>
             </div>
           </div>
