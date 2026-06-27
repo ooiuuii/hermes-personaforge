@@ -33,6 +33,20 @@ const ttsReferenceAudio = path.resolve(
 );
 const ttsPromptText = process.env.PERSONAFORGE_TTS_PROMPT_TEXT ?? "でも、怪しい人の手がかりならある。";
 
+const coldOpenSeconds = Number(process.env.PERSONAFORGE_COLD_OPEN_SECONDS ?? "14");
+const coldOpenSilent = path.join(videoDir, "hermes-personaforge-cold-open.silent.mp4");
+const coldOpenAudio = path.join(audioDir, "hermes-personaforge-cold-open.m4a");
+const coldOpenVideo = path.join(videoDir, "hermes-personaforge-cold-open.en-sub-ja-voice.mp4");
+const commerceClip = path.resolve(
+  process.env.PERSONAFORGE_COMMERCE_CLIP ?? path.join(videoDir, "segments", "live", "01-live-commerce-checkout.mp4"),
+);
+const productCoverImage = path.resolve(
+  process.env.PERSONAFORGE_PRODUCT_COVER_IMAGE ??
+    path.join(root, "artifacts", "local-character-packs", "qiance-persona-product-cover.webp"),
+);
+const commerceAudio = path.join(audioDir, "hermes-personaforge-commerce-bridge.m4a");
+const commerceVideo = path.join(videoDir, "hermes-personaforge-commerce-bridge.mp4");
+
 const experienceSilent = path.join(videoDir, "hermes-personaforge-persona-experience.en-sub.silent.mp4");
 const experienceAudio = path.join(audioDir, "hermes-personaforge-persona-experience.local-voice.m4a");
 const experienceVideo = path.join(videoDir, "hermes-personaforge-persona-experience.en-sub-local-voice.mp4");
@@ -183,6 +197,21 @@ const scenes = [
   },
 ];
 
+const coldOpenScene = {
+  ...scenes[2],
+  userInput: "Nanami, open a browser and search your own profile.",
+  subtitle: "Cold open: the companion searches herself, reads the page, and reacts in real time.",
+  logs: [
+    "$ personaforge browser.open 'https://www.google.com/search?q=Nanami+Chiaki'",
+    "[browser] search results loaded",
+    "[vision] active tab screenshot captured",
+    "[screen-read] result title: Chiaki Nanami - character profile",
+    "[persona] page describes the same unlocked companion",
+    "[emotion] self_reference_score=0.96 -> surprised -> shy",
+    "$ curl http://127.0.0.1:9880/tts -> cold-open.wav",
+  ],
+};
+
 function assertFile(file, label) {
   if (!existsSync(file)) throw new Error(`${label} not found: ${file}`);
 }
@@ -217,6 +246,32 @@ async function canReachGptSovits() {
   }
 }
 
+async function synthesizeGptSovitsLine(text, outputPath, label) {
+  const response = await fetch(`${gptSovitsUrl}/tts`, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({
+      text,
+      text_lang: "ja",
+      ref_audio_path: ttsReferenceAudio.replaceAll("\\", "/"),
+      prompt_text: ttsPromptText,
+      prompt_lang: "ja",
+      text_split_method: "cut5",
+      batch_size: 1,
+      speed_factor: 1.15,
+      media_type: "wav",
+      streaming_mode: false,
+    }),
+    signal: AbortSignal.timeout(180000),
+  });
+  const data = Buffer.from(await response.arrayBuffer());
+  if (!response.ok) {
+    const message = data.toString("utf8");
+    throw new Error(`GPT-SoVITS failed for ${label}: ${response.status} ${message}`);
+  }
+  writeFileSync(outputPath, data);
+}
+
 async function synthesizeSceneAudio() {
   if (process.env.PERSONAFORGE_USE_SYNTH_TTS === "0") {
     return scenes.map((scene) => path.join(localVoiceDir, scene.voice));
@@ -234,29 +289,7 @@ async function synthesizeSceneAudio() {
   for (let index = 0; index < scenes.length; index += 1) {
     const scene = scenes[index];
     const outputPath = path.join(synthDir, `line-${String(index + 1).padStart(2, "0")}.wav`);
-    const response = await fetch(`${gptSovitsUrl}/tts`, {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({
-        text: scene.jaSpeech,
-        text_lang: "ja",
-        ref_audio_path: ttsReferenceAudio.replaceAll("\\", "/"),
-        prompt_text: ttsPromptText,
-        prompt_lang: "ja",
-        text_split_method: "cut5",
-        batch_size: 1,
-        speed_factor: 1.15,
-        media_type: "wav",
-        streaming_mode: false,
-      }),
-      signal: AbortSignal.timeout(180000),
-    });
-    const data = Buffer.from(await response.arrayBuffer());
-    if (!response.ok) {
-      const message = data.toString("utf8");
-      throw new Error(`GPT-SoVITS failed for line ${index + 1}: ${response.status} ${message}`);
-    }
-    writeFileSync(outputPath, data);
+    await synthesizeGptSovitsLine(scene.jaSpeech, outputPath, `line ${index + 1}`);
     outputPaths.push(outputPath);
   }
   return outputPaths;
@@ -287,6 +320,15 @@ function synthesizeUserPromptAudio() {
   return outputPaths;
 }
 
+function synthesizeEdgeTtsText({ text, directory, name, voice = "en-US-AndrewNeural", rate = "+8%" }) {
+  mkdirSync(directory, { recursive: true });
+  const textPath = path.join(directory, `${name}.txt`);
+  const mediaPath = path.join(directory, `${name}.mp3`);
+  writeFileSync(textPath, `${text}\n`, "utf8");
+  runInherit(edgeTts, ["--voice", voice, `--rate=${rate}`, "--file", textPath, "--write-media", mediaPath]);
+  return mediaPath;
+}
+
 function readDuration(file) {
   const output = run(ffprobe, [
     "-v",
@@ -300,6 +342,262 @@ function readDuration(file) {
   const duration = Number(output);
   if (!Number.isFinite(duration) || duration <= 0) throw new Error(`Could not read duration for ${file}`);
   return duration;
+}
+
+function buildColdOpenHtml(spriteUris) {
+  return `<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      background: #0c1017;
+      color: #ecfeff;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    .scene {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      background:
+        radial-gradient(circle at 80% 18%, rgba(20,184,166,.18), transparent 34%),
+        radial-gradient(circle at 18% 82%, rgba(244,114,182,.16), transparent 35%),
+        linear-gradient(135deg, #10141d, #121923 46%, #0b0f17);
+    }
+    .headline {
+      position: absolute;
+      left: 58px;
+      top: 48px;
+      width: 720px;
+      z-index: 8;
+    }
+    .eyebrow {
+      color: #67e8f9;
+      text-transform: uppercase;
+      letter-spacing: .14em;
+      font-size: 14px;
+      font-weight: 900;
+    }
+    h1 {
+      margin: 12px 0 0;
+      font-size: 46px;
+      line-height: 1.02;
+      letter-spacing: 0;
+      color: #ffffff;
+    }
+    .browser {
+      position: absolute;
+      left: 58px;
+      top: 218px;
+      width: 980px;
+      height: 520px;
+      border-radius: 8px;
+      overflow: hidden;
+      background: #f8fafc;
+      box-shadow: 0 36px 110px rgba(0,0,0,.5);
+      border: 1px solid rgba(203,213,225,.3);
+    }
+    .bar {
+      height: 42px;
+      background: #e5e7eb;
+      display: grid;
+      grid-template-columns: 80px 1fr;
+      align-items: center;
+      gap: 12px;
+      padding: 0 14px;
+    }
+    .dots { display: flex; gap: 7px; }
+    .dots i { width: 10px; height: 10px; border-radius: 99px; background: #ef4444; }
+    .dots i:nth-child(2) { background: #f59e0b; }
+    .dots i:nth-child(3) { background: #22c55e; }
+    .url {
+      background: #fff;
+      color: #64748b;
+      border-radius: 6px;
+      padding: 6px 10px;
+      font-size: 13px;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+    .search {
+      padding: 32px 42px;
+      color: #0f172a;
+    }
+    .logo {
+      color: #2563eb;
+      font-size: 34px;
+      font-weight: 950;
+      margin-bottom: 22px;
+    }
+    .searchbox {
+      height: 52px;
+      border: 2px solid #60a5fa;
+      border-radius: 999px;
+      display: flex;
+      align-items: center;
+      padding: 0 22px;
+      font-size: 20px;
+      color: #111827;
+      box-shadow: 0 8px 28px rgba(37,99,235,.16);
+    }
+    .result {
+      margin-top: 28px;
+      padding: 22px;
+      border-radius: 8px;
+      border: 1px solid #dbeafe;
+      background: #ffffff;
+    }
+    .result small { color: #64748b; font-size: 13px; }
+    .result h2 { margin: 8px 0; color: #1d4ed8; font-size: 27px; }
+    .result p { margin: 0; color: #334155; line-height: 1.45; font-size: 18px; }
+    .readtag {
+      display: inline-block;
+      margin-top: 16px;
+      padding: 8px 11px;
+      border-radius: 999px;
+      color: #be185d;
+      background: #fce7f3;
+      font-weight: 900;
+      font-size: 13px;
+    }
+    .persona {
+      position: absolute;
+      right: 130px;
+      bottom: 112px;
+      width: 570px;
+      height: 810px;
+      display: grid;
+      place-items: end center;
+      z-index: 6;
+    }
+    .persona img {
+      max-width: 570px;
+      max-height: 800px;
+      object-fit: contain;
+      filter: drop-shadow(0 34px 62px rgba(0,0,0,.65));
+      animation: pop 850ms ease-out both, breathe 3s ease-in-out 1s infinite;
+    }
+    @keyframes pop { from { opacity: 0; transform: translateY(28px) scale(.94); } to { opacity: 1; transform: translateY(0) scale(1); } }
+    @keyframes breathe { 0%,100%{ transform: translateY(0) scale(1); } 50%{ transform: translateY(-7px) scale(1.012); } }
+    .bubble {
+      position: absolute;
+      right: 455px;
+      bottom: 502px;
+      width: 610px;
+      min-height: 128px;
+      border-radius: 8px;
+      background: rgba(255,255,255,.94);
+      color: #172033;
+      padding: 22px 24px;
+      box-shadow: 0 30px 90px rgba(0,0,0,.42);
+      z-index: 9;
+    }
+    .bubble strong { color: #ec4899; display: block; font-size: 21px; margin-bottom: 8px; }
+    .bubble div { font-size: 26px; line-height: 1.22; font-weight: 850; }
+    .input {
+      position: absolute;
+      left: 58px;
+      bottom: 270px;
+      width: 980px;
+      height: 52px;
+      border-radius: 8px;
+      background: rgba(255,255,255,.92);
+      color: #475569;
+      border: 1px solid rgba(255,255,255,.5);
+      display: flex;
+      align-items: center;
+      padding: 0 18px;
+      font-size: 19px;
+      z-index: 7;
+    }
+    .terminal {
+      position: absolute;
+      left: 58px;
+      right: 58px;
+      bottom: 88px;
+      height: 170px;
+      border-radius: 8px;
+      background: rgba(2,6,23,.9);
+      border: 1px solid rgba(148,163,184,.24);
+      color: #a7f3d0;
+      padding: 18px 22px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 18px;
+      line-height: 1.42;
+      overflow: hidden;
+      z-index: 8;
+    }
+    .terminal .dim { color: #7dd3fc; }
+    .subtitle {
+      position: absolute;
+      left: 50%;
+      bottom: 12px;
+      transform: translateX(-50%);
+      width: min(1560px, calc(100vw - 100px));
+      border-radius: 8px;
+      background: rgba(0,0,0,.72);
+      color: #ffffff;
+      text-align: center;
+      padding: 13px 20px;
+      font-size: 25px;
+      font-weight: 850;
+      z-index: 12;
+    }
+  </style>
+</head>
+<body>
+<div class="scene">
+  <div class="headline">
+    <div class="eyebrow">Hermes PersonaForge cold open</div>
+    <h1>A paid companion can read the page and react.</h1>
+  </div>
+  <section class="browser">
+    <div class="bar"><div class="dots"><i></i><i></i><i></i></div><div class="url">https://www.google.com/search?q=Nanami+Chiaki</div></div>
+    <div class="search">
+      <div class="logo">Search</div>
+      <div class="searchbox" id="query"></div>
+      <div class="result">
+        <small>Danganronpa Wiki / character profile</small>
+        <h2>Chiaki Nanami</h2>
+        <p>Profile result detected. The runtime reads the visible page text, matches the unlocked persona, and routes the character to a surprised-to-shy response.</p>
+        <span class="readtag">screen read: self reference detected</span>
+      </div>
+    </div>
+  </section>
+  <section class="persona"><img src="${spriteUris.surprised}" /></section>
+  <section class="bubble"><strong>Nanami</strong><div id="bubble"></div></section>
+  <section class="input" id="input"></section>
+  <section class="terminal" id="terminal"></section>
+  <div class="subtitle">${coldOpenScene.subtitle}</div>
+</div>
+<script>
+const scene = ${JSON.stringify(coldOpenScene)};
+const start = performance.now();
+function typeText(text, elapsed, duration) {
+  const progress = Math.max(0, Math.min(1, elapsed / duration));
+  const count = Math.floor(text.length * progress);
+  return text.slice(0, count) + (progress < 1 ? "|" : "");
+}
+function tick() {
+  const elapsed = (performance.now() - start) / 1000;
+  document.getElementById("query").textContent = typeText("Nanami Chiaki", Math.max(0, elapsed - 1.1), 1.6);
+  document.getElementById("input").textContent = "You: " + typeText(scene.userInput, elapsed, 3.2);
+  document.getElementById("bubble").textContent = elapsed > 4.1 ? scene.subtitle : "Opening browser...";
+  const visible = Math.max(1, Math.min(scene.logs.length, Math.floor((elapsed - .7) / 1.05) + 1));
+  document.getElementById("terminal").innerHTML = scene.logs.slice(0, visible).map((line, index) => '<div class="' + (index ? 'dim' : '') + '">' + line + '</div>').join('');
+  if (elapsed < ${coldOpenSeconds + 0.5}) requestAnimationFrame(tick);
+}
+tick();
+</script>
+</body>
+</html>`;
 }
 
 function buildHtml(spriteUris) {
@@ -526,7 +824,9 @@ function buildHtml(spriteUris) {
       background: linear-gradient(135deg, #86efac, #fde68a);
       font-size: 56px;
       font-weight: 900;
+      overflow: hidden;
     }
+    .cover img { width: 100%; height: 100%; object-fit: cover; object-position: center top; }
     .copy h2 { margin: 2px 0 10px; font-size: 30px; line-height: 1.05; color: #0f172a; }
     .copy p { margin: 0; color: #475569; line-height: 1.42; font-size: 15px; }
     .price { margin-top: 18px; font-size: 29px; color: #0f172a; font-weight: 900; }
@@ -699,7 +999,7 @@ const start = performance.now();
 const duration = ${durationSeconds};
 
 function productPreview() {
-  return '<div class="store-head"><strong>Qiance EC</strong><span>real paid digital product</span></div><div class="product-grid"><div class="cover">PF</div><div class="copy"><h2>AI Companion Persona Pack</h2><p>A paid character/persona pack. Hermes verifies payment, unlocks a Shinsekai-compatible manifest, and starts a voice-and-vision companion session.</p><div class="price">$1.00</div></div></div>';
+  return '<div class="store-head"><strong>Qiance EC</strong><span>real paid digital product</span></div><div class="product-grid"><div class="cover"><img src="' + sprites.guide + '" /></div><div class="copy"><h2>AI Companion Persona Pack</h2><p>A paid character/persona pack. Hermes verifies payment, unlocks a Shinsekai-compatible manifest, and starts a voice-and-vision companion session.</p><div class="price">$1.00</div></div></div>';
 }
 function checkoutPreview() {
   return '<div class="store-head"><strong>Checkout</strong><span>payment method</span></div><h2 style="margin:8px 0 8px;color:#0f172a;font-size:28px;">Payment selected</h2><div class="pay"><div>PayPal</div><div class="active">AliPay</div></div><p style="color:#475569;font-size:15px;line-height:1.45;margin-top:18px;">The demo uses real paid callback evidence from the live store, then redacts customer and payment secrets before proof generation.</p>';
@@ -785,14 +1085,221 @@ tick();
 </html>`;
 }
 
-async function recordExperienceVideo() {
-  assertFile(introVideo, "Intro video");
+async function recordColdOpenVideo(spriteUris) {
+  const html = buildColdOpenHtml(spriteUris);
+  const htmlPath = path.join(scratchDir, "cold-open.html");
+  writeFileSync(htmlPath, html, "utf8");
+
+  const browser = await chromium.launch({ channel: "chrome", headless: true });
+  const context = await browser.newContext({
+    viewport,
+    recordVideo: {
+      dir: segmentDir,
+      size: viewport,
+    },
+  });
+  const page = await context.newPage();
+  await page.goto(`file://${htmlPath.replaceAll("\\", "/")}`);
+  await page.waitForTimeout((coldOpenSeconds + 0.5) * 1000);
+  const video = page.video();
+  await context.close();
+  await browser.close();
+
+  const rawPath = await video.path();
+  const webmPath = path.join(segmentDir, "cold-open.webm");
+  if (existsSync(webmPath)) rmSync(webmPath);
+  if (existsSync(coldOpenSilent)) rmSync(coldOpenSilent);
+  await rename(rawPath, webmPath);
+  runInherit(ffmpeg, [
+    "-hide_banner",
+    "-loglevel",
+    "error",
+    "-y",
+    "-i",
+    webmPath,
+    "-vf",
+    "fps=30,format=yuv420p",
+    "-an",
+    "-c:v",
+    "libx264",
+    "-pix_fmt",
+    "yuv420p",
+    "-movflags",
+    "+faststart",
+    coldOpenSilent,
+  ]);
+}
+
+async function buildColdOpenAudio() {
+  const coldDir = path.join(audioDir, "personaforge-cold-open");
+  mkdirSync(coldDir, { recursive: true });
+  const userPrompt = synthesizeEdgeTtsText({
+    directory: coldDir,
+    name: "cold-open-user",
+    text: coldOpenScene.userInput,
+    rate: "+10%",
+  });
+  const characterLine = path.join(coldDir, "cold-open-nanami.wav");
+  if (process.env.PERSONAFORGE_USE_SYNTH_TTS === "0" || !(await canReachGptSovits())) {
+    const fallback = path.join(localVoiceDir, coldOpenScene.voice);
+    assertFile(fallback, "Cold open fallback voice");
+    writeFileSync(characterLine, readFileSync(fallback));
+  } else {
+    assertFile(ttsReferenceAudio, "GPT-SoVITS reference audio");
+    await synthesizeGptSovitsLine(coldOpenScene.jaSpeech, characterLine, "cold open");
+  }
+
+  const bgmPath = path.join(audioDir, "hermes-personaforge-live-soft-bed.m4a");
+  if (!existsSync(bgmPath)) {
+    runInherit(ffmpeg, [
+      "-hide_banner",
+      "-loglevel",
+      "error",
+      "-y",
+      "-f",
+      "lavfi",
+      "-i",
+      `sine=frequency=98:sample_rate=48000:duration=${coldOpenSeconds}`,
+      "-filter_complex",
+      "[0:a]volume=0.035,lowpass=f=300[aout]",
+      "-map",
+      "[aout]",
+      "-c:a",
+      "aac",
+      "-b:a",
+      "128k",
+      bgmPath,
+    ]);
+  }
+
+  runInherit(ffmpeg, [
+    "-hide_banner",
+    "-loglevel",
+    "error",
+    "-y",
+    "-i",
+    userPrompt,
+    "-i",
+    characterLine,
+    "-stream_loop",
+    "-1",
+    "-i",
+    bgmPath,
+    "-filter_complex",
+    `[0:a]aresample=48000,aformat=sample_rates=48000:channel_layouts=stereo,adelay=350:all=1,volume=1.05,apad,atrim=0:${coldOpenSeconds}[u];` +
+      `[1:a]aresample=48000,aformat=sample_rates=48000:channel_layouts=stereo,adelay=5200:all=1,volume=2.15,apad,atrim=0:${coldOpenSeconds}[v];` +
+      `[2:a]atrim=0:${coldOpenSeconds},asetpts=PTS-STARTPTS,volume=0.055[bgm];` +
+      "[u][v][bgm]amix=inputs=3:duration=longest:dropout_transition=2,alimiter=limit=0.95,aformat=sample_rates=48000:channel_layouts=stereo[aout]",
+    "-map",
+    "[aout]",
+    "-c:a",
+    "aac",
+    "-b:a",
+    "192k",
+    coldOpenAudio,
+  ]);
+}
+
+function muxColdOpenVideo() {
+  runInherit(ffmpeg, [
+    "-hide_banner",
+    "-loglevel",
+    "error",
+    "-y",
+    "-i",
+    coldOpenSilent,
+    "-i",
+    coldOpenAudio,
+    "-map",
+    "0:v:0",
+    "-map",
+    "1:a:0",
+    "-c:v",
+    "copy",
+    "-c:a",
+    "aac",
+    "-b:a",
+    "192k",
+    "-shortest",
+    coldOpenVideo,
+  ]);
+}
+
+function buildCommerceBridgeVideo() {
+  assertFile(commerceClip, "Commerce clip");
+  assertFile(productCoverImage, "Product cover image");
+  const duration = readDuration(commerceClip);
+  const bridgeDir = path.join(audioDir, "personaforge-commerce-bridge");
+  const narration = synthesizeEdgeTtsText({
+    directory: bridgeDir,
+    name: "commerce-bridge-andrew",
+    text:
+      "This is the live Qiance EC site. The buyer opens the AI Companion Persona Pack, adds it to cart, reaches checkout, and selects AliPay. Hermes later uses the paid callback as proof before unlocking the companion.",
+    rate: "+9%",
+  });
+  const bgmPath = path.join(audioDir, "hermes-personaforge-live-soft-bed.m4a");
+  runInherit(ffmpeg, [
+    "-hide_banner",
+    "-loglevel",
+    "error",
+    "-y",
+    "-i",
+    narration,
+    "-stream_loop",
+    "-1",
+    "-i",
+    bgmPath,
+    "-filter_complex",
+    `[0:a]aresample=48000,aformat=sample_rates=48000:channel_layouts=stereo,adelay=400:all=1,volume=1.0,apad,atrim=0:${duration}[v];` +
+      `[1:a]atrim=0:${duration},asetpts=PTS-STARTPTS,volume=0.045[bgm];` +
+      "[v][bgm]amix=inputs=2:duration=longest:dropout_transition=2,alimiter=limit=0.95,aformat=sample_rates=48000:channel_layouts=stereo[aout]",
+    "-map",
+    "[aout]",
+    "-c:a",
+    "aac",
+    "-b:a",
+    "192k",
+    commerceAudio,
+  ]);
+  runInherit(ffmpeg, [
+    "-hide_banner",
+    "-loglevel",
+    "error",
+    "-y",
+    "-i",
+    commerceClip,
+    "-loop",
+    "1",
+    "-i",
+    productCoverImage,
+    "-i",
+    commerceAudio,
+    "-filter_complex",
+    "[0:v]scale=1920:1080,fps=30,setsar=1[base];[1:v]scale=360:360:force_original_aspect_ratio=decrease,pad=360:360:(ow-iw)/2:(oh-ih)/2:color=0xfdf2f8[cover];[base][cover]overlay=462:452:enable='between(t,0,10.8)',format=yuv420p[v]",
+    "-map",
+    "[v]",
+    "-map",
+    "2:a:0",
+    "-t",
+    String(duration),
+    "-c:v",
+    "libx264",
+    "-pix_fmt",
+    "yuv420p",
+    "-c:a",
+    "aac",
+    "-b:a",
+    "192k",
+    "-movflags",
+    "+faststart",
+    commerceVideo,
+  ]);
+}
+
+async function recordExperienceVideo(spriteUris) {
   Object.values(spriteFiles).forEach((file) => assertFile(path.join(localSpriteDir, file), "Local sprite"));
   scenes.forEach((scene) => assertFile(path.join(localVoiceDir, scene.voice), "Local voice clip"));
 
-  const spriteUris = Object.fromEntries(
-    Object.entries(spriteFiles).map(([key, file]) => [key, fileDataUri(path.join(localSpriteDir, file))]),
-  );
   const html = buildHtml(spriteUris);
   const htmlPath = path.join(scratchDir, "persona-experience.html");
   writeFileSync(htmlPath, html, "utf8");
@@ -941,7 +1448,8 @@ function muxExperienceVideo() {
 }
 
 function concatFinalVideo() {
-  const introDuration = readDuration(introVideo);
+  const coldDuration = readDuration(coldOpenVideo);
+  const commerceDuration = readDuration(commerceVideo);
   const experienceDuration = readDuration(experienceVideo);
   runInherit(ffmpeg, [
     "-hide_banner",
@@ -949,11 +1457,13 @@ function concatFinalVideo() {
     "error",
     "-y",
     "-i",
-    introVideo,
+    coldOpenVideo,
+    "-i",
+    commerceVideo,
     "-i",
     experienceVideo,
     "-filter_complex",
-    "[0:v]scale=1920:1080,fps=30,setsar=1,setpts=PTS-STARTPTS[v0];[1:v]scale=1920:1080,fps=30,setsar=1,setpts=PTS-STARTPTS[v1];[0:a]aresample=48000,asetpts=N/SR/TB[a0];[1:a]aresample=48000,asetpts=N/SR/TB[a1];[v0][a0][v1][a1]concat=n=2:v=1:a=1[v][a]",
+    "[0:v]scale=1920:1080,fps=30,setsar=1,setpts=PTS-STARTPTS[v0];[1:v]scale=1920:1080,fps=30,setsar=1,setpts=PTS-STARTPTS[v1];[2:v]scale=1920:1080,fps=30,setsar=1,setpts=PTS-STARTPTS[v2];[0:a]aresample=48000,asetpts=N/SR/TB[a0];[1:a]aresample=48000,asetpts=N/SR/TB[a1];[2:a]aresample=48000,asetpts=N/SR/TB[a2];[v0][a0][v1][a1][v2][a2]concat=n=3:v=1:a=1[v][a]",
     "-map",
     "[v]",
     "-map",
@@ -972,7 +1482,9 @@ function concatFinalVideo() {
   ]);
   const finalDuration = readDuration(finalVideo);
   console.log(`THREE_MINUTE_DEMO: ${finalVideo}`);
-  console.log(`intro=${introDuration.toFixed(2)}s experience=${experienceDuration.toFixed(2)}s final=${finalDuration.toFixed(2)}s`);
+  console.log(
+    `cold=${coldDuration.toFixed(2)}s commerce=${commerceDuration.toFixed(2)}s experience=${experienceDuration.toFixed(2)}s final=${finalDuration.toFixed(2)}s`,
+  );
 }
 
 mkdirSync(videoDir, { recursive: true });
@@ -980,7 +1492,16 @@ mkdirSync(audioDir, { recursive: true });
 mkdirSync(segmentDir, { recursive: true });
 mkdirSync(scratchDir, { recursive: true });
 
-await recordExperienceVideo();
+Object.values(spriteFiles).forEach((file) => assertFile(path.join(localSpriteDir, file), "Local sprite"));
+const spriteUris = Object.fromEntries(
+  Object.entries(spriteFiles).map(([key, file]) => [key, fileDataUri(path.join(localSpriteDir, file))]),
+);
+
+await recordColdOpenVideo(spriteUris);
+await buildColdOpenAudio();
+muxColdOpenVideo();
+buildCommerceBridgeVideo();
+await recordExperienceVideo(spriteUris);
 await buildExperienceAudio();
 muxExperienceVideo();
 concatFinalVideo();
