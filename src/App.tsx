@@ -237,7 +237,7 @@ function RuntimeView() {
           <PersonaPortrait emotion="shy" />
           <div className="speech-panel">
             <span>browser context detected</span>
-            <strong>"Wait... this page is about me? That's a little embarrassing."</strong>
+            <strong>"This page is about me? I'm a little embarrassed."</strong>
             <p>emotion route: shy / sprite switch / voice response queued</p>
           </div>
         </div>
