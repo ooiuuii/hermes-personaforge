@@ -25,6 +25,12 @@ const localVoiceDir = path.resolve(
   process.env.PERSONAFORGE_LOCAL_VOICE_DIR ??
     "F:/AI/app/2dclaw-bridge/downloads/nanami_official_extracted/speech/nanami",
 );
+const gptSovitsUrl = (process.env.PERSONAFORGE_GPT_SOVITS_URL ?? "http://127.0.0.1:9880").replace(/\/$/, "");
+const ttsReferenceAudio = path.resolve(
+  process.env.PERSONAFORGE_TTS_REF_AUDIO ??
+    "F:/AI/app/2dclaw-bridge/downloads/nanami_official_extracted/models/nanami.aac_0001620800_0001747840.wav",
+);
+const ttsPromptText = process.env.PERSONAFORGE_TTS_PROMPT_TEXT ?? "でも、怪しい人の手がかりならある。";
 
 const experienceSilent = path.join(videoDir, "hermes-personaforge-persona-experience.en-sub.silent.mp4");
 const experienceAudio = path.join(audioDir, "hermes-personaforge-persona-experience.local-voice.m4a");
@@ -50,6 +56,7 @@ const scenes = [
     sprite: "guide",
     mode: "product",
     voice: "nanami_voice_02.wav",
+    jaSpeech: "商品ページが見えるよ。えっと、このペルソナパック、私のことだよね。",
     userInput: "Nanami, can you look at the persona pack I just bought?",
     subtitle: "I can see the product page. Wait... this persona pack is about me, right?",
     status: "vision context: Qiance EC product page",
@@ -66,6 +73,7 @@ const scenes = [
     sprite: "thinking",
     mode: "checkout",
     voice: "nanami_voice_18.wav",
+    jaSpeech: "支払いは確認済み。Hermes がブラウザだけに頼らず、マニフェストを解放するんだね。",
     userInput: "The buyer paid with AliPay. Can Hermes unlock the manifest?",
     subtitle: "Payment cleared. Hermes unlocks my manifest instead of trusting the browser alone.",
     status: "Hermes payment reconciliation passed",
@@ -82,6 +90,7 @@ const scenes = [
     sprite: "surprised",
     mode: "baike",
     voice: "nanami_voice_12.wav",
+    jaSpeech: "自分のページを見つけちゃった。ちょっと、恥ずかしいかも。",
     userInput: "Search yourself on the page and tell me what you notice.",
     subtitle: "It found my profile page. That is a little embarrassing...",
     status: "self-reference detected",
@@ -98,6 +107,7 @@ const scenes = [
     sprite: "shy",
     mode: "runtime",
     voice: "nanami_voice_20.wav",
+    jaSpeech: "ライセンスから、声、視覚、記憶、表情ルートが起動してるよ。",
     userInput: "So what did the customer actually unlock after purchase?",
     subtitle: "Voice, vision, memory, and expression routes are online from the licensed manifest.",
     status: "local runtime online",
@@ -114,6 +124,7 @@ const scenes = [
     sprite: "focused",
     mode: "proof",
     voice: "nanami_voice_09.wav",
+    jaSpeech: "監査ログも残ってる。支払い、ライセンス、実行記録、安全レポート、全部確認できるよ。",
     userInput: "Why is this a Hermes business-agent product, not only roleplay?",
     subtitle: "The audit trail is real: payment, license, runtime trace, safety report, and proof manifest.",
     status: "proof pack regenerated",
@@ -132,6 +143,7 @@ const scenes = [
     sprite: "happy",
     mode: "ready",
     voice: "nanami_voice_04.wav",
+    jaSpeech: "準備できたよ。購入したコンパニオンと、もう話せるよ。",
     userInput: "Ready for the buyer's companion session?",
     subtitle: "Session ready. The buyer can now talk with the companion they purchased.",
     status: "paid companion session ready",
@@ -167,6 +179,60 @@ function runInherit(command, args) {
 function fileDataUri(file) {
   const data = readFileSync(file).toString("base64");
   return `data:image/webp;base64,${data}`;
+}
+
+async function canReachGptSovits() {
+  try {
+    const response = await fetch(`${gptSovitsUrl}/docs`, { signal: AbortSignal.timeout(2500) });
+    return response.ok;
+  } catch {
+    return false;
+  }
+}
+
+async function synthesizeSceneAudio() {
+  if (process.env.PERSONAFORGE_USE_SYNTH_TTS === "0") {
+    return scenes.map((scene) => path.join(localVoiceDir, scene.voice));
+  }
+  if (!(await canReachGptSovits())) {
+    console.warn("GPT-SoVITS is not reachable; falling back to local bound voice clips.");
+    return scenes.map((scene) => path.join(localVoiceDir, scene.voice));
+  }
+
+  assertFile(ttsReferenceAudio, "GPT-SoVITS reference audio");
+  const synthDir = path.join(audioDir, "personaforge-synth-lines");
+  mkdirSync(synthDir, { recursive: true });
+
+  const outputPaths = [];
+  for (let index = 0; index < scenes.length; index += 1) {
+    const scene = scenes[index];
+    const outputPath = path.join(synthDir, `line-${String(index + 1).padStart(2, "0")}.wav`);
+    const response = await fetch(`${gptSovitsUrl}/tts`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        text: scene.jaSpeech,
+        text_lang: "ja",
+        ref_audio_path: ttsReferenceAudio.replaceAll("\\", "/"),
+        prompt_text: ttsPromptText,
+        prompt_lang: "ja",
+        text_split_method: "cut5",
+        batch_size: 1,
+        speed_factor: 1.15,
+        media_type: "wav",
+        streaming_mode: false,
+      }),
+      signal: AbortSignal.timeout(180000),
+    });
+    const data = Buffer.from(await response.arrayBuffer());
+    if (!response.ok) {
+      const message = data.toString("utf8");
+      throw new Error(`GPT-SoVITS failed for line ${index + 1}: ${response.status} ${message}`);
+    }
+    writeFileSync(outputPath, data);
+    outputPaths.push(outputPath);
+  }
+  return outputPaths;
 }
 
 function readDuration(file) {
@@ -571,7 +637,7 @@ function buildHtml(spriteUris) {
     <div class="terminal-main" id="terminalText"></div>
     <div class="terminal-side" id="statusPanel"></div>
   </section>
-  <div class="small-note">local character voice clips + English subtitles</div>
+  <div class="small-note">GPT-SoVITS character voice + English subtitles</div>
   <div class="subtitle" id="subtitle"></div>
 </div>
 <script>
@@ -618,7 +684,7 @@ function statusFor(scene) {
   const rows = [
     ['mode', scene.mode],
     ['status', scene.status],
-    ['voice', scene.voice],
+    ['voice', 'GPT-SoVITS synthesized line'],
     ['assets', 'local-only'],
   ];
   return rows.map(([k,v]) => '<div><span>' + k + '</span><strong>' + v + '</strong></div>').join('');
@@ -714,7 +780,8 @@ async function recordExperienceVideo() {
   ]);
 }
 
-function buildExperienceAudio() {
+async function buildExperienceAudio() {
+  const sceneAudioPaths = await synthesizeSceneAudio();
   const bgmPath = path.join(audioDir, "hermes-personaforge-live-soft-bed.m4a");
   if (!existsSync(bgmPath)) {
     runInherit(ffmpeg, [
@@ -743,7 +810,7 @@ function buildExperienceAudio() {
   }
 
   const inputs = [];
-  scenes.forEach((scene) => inputs.push("-i", path.join(localVoiceDir, scene.voice)));
+  sceneAudioPaths.forEach((audioPath) => inputs.push("-i", audioPath));
   inputs.push("-stream_loop", "-1", "-i", bgmPath);
 
   const filters = scenes
@@ -844,6 +911,6 @@ mkdirSync(segmentDir, { recursive: true });
 mkdirSync(scratchDir, { recursive: true });
 
 await recordExperienceVideo();
-buildExperienceAudio();
+await buildExperienceAudio();
 muxExperienceVideo();
 concatFinalVideo();
