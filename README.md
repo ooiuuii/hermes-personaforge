@@ -17,6 +17,19 @@ This is a fourth standalone Hermes Agent Accelerated Business Hackathon submissi
 A customer buys an AI Companion Persona Pack, Hermes verifies payment, unlocks a Shinsekai-compatible manifest, launches the character runtime, and generates a proof pack judges can regenerate.
 ```
 
+## Commercial Thesis
+
+Most agent products focus on productivity: automate work, save time, reduce cost. PersonaForge explores the other side of the same agent economy: paid emotional-value agents.
+
+The long-term product is a marketplace and delivery layer for licensed persona packs:
+
+- IP owners can authorize official character/persona packs.
+- Independent agent artists can create original personas with voice style, memory, interaction scripts, skills, and demo videos.
+- PersonaForge can list those packs, verify payment, unlock manifests, route revenue shares, and generate audit proof.
+- Hermes acts as the controlled business agent: it checks rights, entitlement, margin, refund/hold paths, runtime delivery, and proof.
+
+See [Marketplace model](docs/MARKETPLACE_MODEL.md).
+
 ## Watch
 
 ```text
@@ -68,6 +81,7 @@ The local video runtime is deliberately a demo harness: it proves the emotional 
 More detail:
 
 - [Hermes plugin roadmap](docs/HERMES_PLUGIN_ROADMAP.md)
+- [Marketplace model](docs/MARKETPLACE_MODEL.md)
 - [Originality and attribution](docs/ORIGINALITY_AND_ATTRIBUTION.md)
 - [Asset policy](docs/ASSET_POLICY.md)
 
