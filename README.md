@@ -51,6 +51,26 @@ This repository does **not** redistribute third-party character packs, voice che
 
 For video capture, a local Shinsekai-compatible character pack may be used privately to demonstrate voice, vision, and sprite switching. The public repo ships the generic business workflow and verifier-safe proof artifacts.
 
+## What This Repo Is
+
+PersonaForge is currently a hackathon proof-of-business repo, not a packaged official Hermes plugin yet.
+
+| Layer | Current repo | Future plugin direction |
+| --- | --- | --- |
+| Commerce | Redacted Qiance EC paid-order proof and entitlement model | Real storefront/payment webhook adapter |
+| Decisioning | Hermes-style margin gate and unlock/hold policy | Hermes skill/tool policy for paid persona delivery |
+| Delivery | Hashable persona license manifest and gated download model | Installable `PERSONAFORGE_SKILL.md` plus manifest import tools |
+| Runtime | Shinsekai-compatible local demo runtime trace | Hermes plugin that launches or controls compatible companion runtimes |
+| Evidence | Regenerable proof pack and audit ledger | Append-only proof pack for payment, license, runtime, and safety events |
+
+The local video runtime is deliberately a demo harness: it proves the emotional product experience, while the repo proves the business operation around that experience.
+
+More detail:
+
+- [Hermes plugin roadmap](docs/HERMES_PLUGIN_ROADMAP.md)
+- [Originality and attribution](docs/ORIGINALITY_AND_ATTRIBUTION.md)
+- [Asset policy](docs/ASSET_POLICY.md)
+
 ## Proof Pack
 
 Run:
